@@ -1,199 +1,32 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
-import { X, Plus, Upload, ArrowLeft, User } from "lucide-react"
+import { Check, Upload, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export interface DHItem { id: string; thumb: string; name: string }
+export interface DHItem {
+  id: string
+  thumb: string
+  name: string
+}
 
-const mockAvatars: (DHItem & { desc: string })[] = [
-  { id: "dh-1", name: "Amy",  thumb: "https://picsum.photos/seed/dh1/200/280", desc: "职业女性，适合商务场景" },
-  { id: "dh-2", name: "Leo",  thumb: "https://picsum.photos/seed/dh2/200/280", desc: "年轻男性，适合潮流推荐" },
-  { id: "dh-3", name: "Mia",  thumb: "https://picsum.photos/seed/dh3/200/280", desc: "活泼女性，适合生活分享" },
-  { id: "dh-4", name: "Jack", thumb: "https://picsum.photos/seed/dh4/200/280", desc: "成熟男性，适合测评讲解" },
-  { id: "dh-5", name: "Lily", thumb: "https://picsum.photos/seed/dh5/200/280", desc: "甜美女性，适合美妆种草" },
+type AvatarItem = DHItem
+
+const mockAvatars: AvatarItem[] = [
+  { id: "dh-amy", name: "安然", thumb: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-chen", name: "陈墨", thumb: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-lin", name: "林夕", thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-zhou", name: "周野", thumb: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-xia", name: "夏朵", thumb: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-yi", name: "一鸣", thumb: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-nuan", name: "暖暖", thumb: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-shen", name: "沈川", thumb: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-ke", name: "可可", thumb: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-rui", name: "瑞安", thumb: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-susu", name: "苏苏", thumb: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=420&h=560&q=85" },
+  { id: "dh-luo", name: "洛川", thumb: "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=420&h=560&q=85" },
 ]
-
-// ─── Human silhouette SVG ────────────────────────────────────────────────────
-
-function HumanSilhouette({ dim }: { dim?: boolean }) {
-  const fill = dim ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.18)"
-  return (
-    <svg
-      viewBox="0 0 100 200"
-      className="w-full h-full"
-      preserveAspectRatio="xMidYMid meet"
-      style={{ animation: dim ? undefined : "dh-fade-in 0.5s ease both" }}
-    >
-      <g fill={fill}>
-        {/* Head */}
-        <ellipse cx="50" cy="14" rx="12" ry="13" />
-        {/* Neck */}
-        <rect x="44" y="26" width="12" height="10" rx="3" />
-        {/* Torso — shoulders, subtle waist, hips */}
-        <path d="M43,34 Q27,37 18,50 C15,60 15,76 18,88 C20,97 20,106 22,116 L78,116 C80,106 80,97 82,88 C85,76 85,60 82,50 Q73,37 57,34 Z" />
-        {/* Left arm — sits outside the torso outline with a clean armpit gap */}
-        <path d="M16,52 C10,66 7,84 7,102 C7,112 8,120 10,128 C9,134 8,140 10,144 C12,147 16,147 17,143 C18,136 17,130 18,124 C16,116 15,104 14,92 C14,76 14,64 14,54 Z" />
-        {/* Right arm */}
-        <path d="M84,52 C90,66 93,84 93,102 C93,112 92,120 90,128 C91,134 92,140 90,144 C88,147 84,147 83,143 C82,136 83,130 82,124 C84,116 85,104 86,92 C86,76 86,64 86,54 Z" />
-        {/* Left leg */}
-        <path d="M22,116 C19,130 18,146 20,162 C20,172 22,180 22,192 C22,197 25,199 29,199 C35,199 37,197 37,192 C37,185 35,175 34,162 C36,146 38,130 38,116 Z" />
-        {/* Right leg */}
-        <path d="M78,116 C81,130 82,146 80,162 C80,172 78,180 78,192 C78,197 75,199 71,199 C65,199 63,197 63,192 C63,185 65,175 66,162 C64,146 62,130 62,116 Z" />
-      </g>
-    </svg>
-  )
-}
-
-// ─── Scanning animation panel ────────────────────────────────────────────────
-
-function GeneratingView() {
-  return (
-    <div className="flex flex-col items-center justify-center gap-6 w-full h-full">
-      {/* Silhouette + scan line */}
-      <div className="relative w-24 h-48 shrink-0">
-        <HumanSilhouette />
-        {/* Scan line */}
-        <div
-          className="absolute left-[-6px] right-[-6px] h-px pointer-events-none"
-          style={{
-            top: 0,
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(201,255,41,0.4) 20%, #c9ff29 50%, rgba(201,255,41,0.4) 80%, transparent 100%)",
-            boxShadow: "0 0 6px 3px rgba(201,255,41,0.35)",
-            animation: "dh-scan 1.8s ease-in-out infinite",
-          }}
-        />
-        {/* Subtle grid lines overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(201,255,41,0.6) 14px, rgba(201,255,41,0.6) 15px)",
-          }}
-        />
-      </div>
-
-      {/* Loading text */}
-      <div className="flex flex-col items-center gap-1.5">
-        <p
-          className="text-white/70 text-[13px] font-medium tracking-widest"
-          style={{ animation: "dh-fade-in 0.4s ease both" }}
-        >
-          生成中
-          <DotsLoader />
-        </p>
-        <p className="text-white/30 text-[11px]">数字人克隆通常需要 2~5 分钟</p>
-      </div>
-    </div>
-  )
-}
-
-function DotsLoader() {
-  const [dots, setDots] = useState(1)
-  // cycle dots 1→2→3→1
-  useState(() => {
-    const id = setInterval(() => setDots((d) => (d % 3) + 1), 500)
-    return () => clearInterval(id)
-  })
-  return <span className="inline-block w-5 text-left">{".".repeat(dots)}</span>
-}
-
-function IdleView() {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4 w-full h-full opacity-30">
-      <div className="w-20 h-40">
-        <HumanSilhouette dim />
-      </div>
-      <p className="text-white text-[12px] tracking-wide">点击「创建」开始生成</p>
-    </div>
-  )
-}
-
-// ─── Create view (split layout) ──────────────────────────────────────────────
-
-function CreateView({ onBack }: { onBack: () => void }) {
-  const [name, setName] = useState("")
-  const [generating, setGenerating] = useState(false)
-
-  function handleCreate() {
-    if (!name.trim()) return
-    setGenerating(true)
-  }
-
-  return (
-    <div className="flex w-full h-full">
-      {/* Left: form */}
-      <div className="w-[268px] shrink-0 border-r border-[var(--line)] flex flex-col">
-        <div className="flex items-center gap-2 px-4 pt-5 pb-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--muted)] hover:bg-[var(--soft)] cursor-pointer"
-          >
-            <ArrowLeft size={17} />
-          </button>
-          <span className="text-[15px] font-bold text-[var(--text)]">新建数字人</span>
-        </div>
-
-        <div className="flex-1 px-4 pb-5 flex flex-col gap-4 overflow-y-auto">
-          {/* Upload zone */}
-          <label className="shrink-0 flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-[var(--line-strong)] rounded-2xl py-3.5 px-4 bg-[var(--soft-2)] cursor-pointer hover:border-[var(--muted)] transition-colors">
-            <input type="file" accept="image/*,video/*" className="hidden" />
-            <div className="w-8 h-8 rounded-full bg-[var(--soft)] flex items-center justify-center text-[var(--muted)]">
-              <Upload size={15} />
-            </div>
-            <p className="text-[12px] font-semibold text-[var(--text)]">上传照片或视频</p>
-            <p className="text-[10px] text-[var(--muted)] text-center leading-snug">
-              JPG / PNG / MP4 · 正面半身 ≥ 512×512
-            </p>
-          </label>
-
-          {/* Name */}
-          <div className="shrink-0 flex flex-col gap-1.5">
-            <label className="text-[12px] font-semibold text-[var(--text)]">名称</label>
-            <input
-              type="text"
-              className="h-9 px-3 rounded-lg border border-[var(--line)] bg-white text-[13px] placeholder:text-[var(--muted-2)] outline-none focus:border-[var(--line-strong)]"
-              placeholder="为数字人起个名字"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={20}
-            />
-          </div>
-
-          {/* Prompt */}
-          <div className="shrink-0 flex flex-col gap-1.5">
-            <label className="text-[12px] font-semibold text-[var(--text)]">生成提示词</label>
-            <textarea
-              className="px-3 py-2 rounded-lg border border-[var(--line)] bg-white text-[13px] placeholder:text-[var(--muted-2)] outline-none focus:border-[var(--line-strong)] resize-none leading-relaxed"
-              rows={3}
-              placeholder="描述数字人的外貌、风格与用途…"
-            />
-          </div>
-
-          {/* Create button */}
-          <button
-            type="button"
-            disabled={!name.trim()}
-            onClick={handleCreate}
-            className="mt-auto shrink-0 h-9 rounded-full bg-[var(--near-black)] text-white text-[13px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-          >
-            创建
-          </button>
-        </div>
-      </div>
-
-      {/* Right: dark preview */}
-      <div className="flex-1 bg-[#0d0d0f] rounded-r-2xl overflow-hidden flex items-center justify-center">
-        {generating ? <GeneratingView /> : <IdleView />}
-      </div>
-    </div>
-  )
-}
-
-// ─── Modal ───────────────────────────────────────────────────────────────────
 
 export function DigitalHumanModal({
   open,
@@ -201,12 +34,28 @@ export function DigitalHumanModal({
   onConfirm,
 }: {
   open: boolean
-  onOpenChange: (v: boolean) => void
+  onOpenChange: (open: boolean) => void
   onConfirm?: (item: DHItem) => void
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(mockAvatars[0].id)
-  const [view, setView] = useState<"list" | "create">("list")
-  const selectedAvatar = mockAvatars.find((a) => a.id === selectedId)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploadedAvatar, setUploadedAvatar] = useState<AvatarItem | null>(null)
+  const [selectedId, setSelectedId] = useState(mockAvatars[0].id)
+  const avatars = uploadedAvatar ? [uploadedAvatar, ...mockAvatars] : mockAvatars
+  const selectedAvatar = avatars.find((avatar) => avatar.id === selectedId)
+
+  function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const avatar = {
+      id: `local-${Date.now()}`,
+      name: file.name.replace(/\.[^/.]+$/, "") || "本地数字人",
+      thumb: URL.createObjectURL(file),
+    }
+    setUploadedAvatar(avatar)
+    setSelectedId(avatar.id)
+    event.target.value = ""
+  }
 
   function handleConfirm() {
     if (!selectedAvatar) return
@@ -214,94 +63,78 @@ export function DigitalHumanModal({
     onOpenChange(false)
   }
 
-  function handleOpenChange(v: boolean) {
-    if (!v) setView("list")
-    onOpenChange(v)
-  }
-
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[640px] h-[520px] bg-white rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] flex overflow-hidden data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
-          {view === "create" ? (
-            <CreateView onBack={() => setView("list")} />
-          ) : (
-            <>
-              {/* Left panel: avatar list */}
-              <div className="w-[220px] border-r border-[var(--line)] flex flex-col">
-                <div className="flex items-center justify-between px-4 pt-5 pb-3">
-                  <Dialog.Title className="text-[15px] font-bold text-[var(--text)]">数字人</Dialog.Title>
-                  <button
-                    type="button"
-                    onClick={() => setView("create")}
-                    className="h-7 px-2.5 rounded-full bg-[var(--soft)] text-[12px] font-semibold text-[var(--text)] flex items-center gap-1 cursor-pointer hover:bg-[var(--line)]"
-                  >
-                    <Plus size={13} />
-                    新建
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-2 pb-2">
-                  {mockAvatars.map((a) => (
-                    <button
-                      key={a.id}
-                      type="button"
-                      onClick={() => setSelectedId(a.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl cursor-pointer transition-colors",
-                        selectedId === a.id ? "bg-[var(--soft)]" : "hover:bg-[var(--soft-2)]"
-                      )}
-                    >
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--soft)] shrink-0">
-                        <img src={a.thumb} alt={a.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <p className="text-[13px] font-semibold text-[var(--text)] truncate">{a.name}</p>
-                        <p className="text-[11px] text-[var(--muted)] truncate">{a.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        <Dialog.Overlay className="fixed inset-0 z-[80] bg-[#0f172a]/35 backdrop-blur-[8px] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[81] flex h-[min(720px,calc(100vh-48px))] w-[min(1140px,calc(100vw-40px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[18px] border border-white/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+          <header className="flex items-center border-b border-[var(--line)] px-6 py-4">
+            <div className="min-w-0 flex-1">
+              <Dialog.Title className="text-[18px] font-bold text-[var(--text)]">选择数字人</Dialog.Title>
+              <p className="mt-0.5 text-[12px] text-[var(--muted)]">选择一个数字人，用于本次视频生成</p>
+            </div>
+            <Dialog.Close aria-label="关闭" className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--soft)] hover:text-[var(--text)]">
+              <X size={18} />
+            </Dialog.Close>
+          </header>
 
-              {/* Right panel: preview */}
-              <div className="flex-1 flex flex-col">
-                <div className="flex items-center justify-end px-4 pt-4">
-                  <Dialog.Close className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--muted)] hover:bg-[var(--soft)] cursor-pointer">
-                    <X size={18} />
-                  </Dialog.Close>
-                </div>
-                <div className="flex-1 flex items-center justify-center px-8 pb-4">
-                  {selectedAvatar ? (
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-44 h-60 rounded-2xl overflow-hidden bg-[var(--soft)]">
-                        <img src={selectedAvatar.thumb} alt={selectedAvatar.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[16px] font-bold text-[var(--text)]">{selectedAvatar.name}</p>
-                        <p className="text-[13px] text-[var(--muted)] mt-1">{selectedAvatar.desc}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-3 text-[var(--muted)]">
-                      <User size={40} strokeWidth={1.5} />
-                      <p className="text-[14px]">选择一个数字人</p>
-                    </div>
-                  )}
-                </div>
-                <div className="px-6 py-4 border-t border-[var(--line)] flex justify-end">
+          <div className="min-h-0 flex-1 overflow-y-auto p-5">
+            <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="group flex min-h-[255px] flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--line-strong)] bg-[var(--soft-2)] px-4 text-center text-[var(--muted)] transition-colors hover:border-[var(--text)] hover:bg-white hover:text-[var(--text)]"
+              >
+                <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[var(--text)] shadow-sm transition-transform group-hover:scale-105">
+                  <Upload size={19} />
+                </span>
+                <span className="text-[14px] font-semibold">本地上传</span>
+                <span className="mt-1 text-[11px] text-[var(--muted)]">上传一张人物图片</span>
+              </button>
+
+              {avatars.map((avatar) => {
+                const selected = selectedId === avatar.id
+                return (
                   <button
+                    key={avatar.id}
                     type="button"
-                    onClick={handleConfirm}
-                    disabled={!selectedId}
-                    className="h-9 px-5 rounded-full bg-[var(--near-black)] text-white text-[13px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                    onClick={() => setSelectedId(avatar.id)}
+                    className={cn(
+                      "group relative min-h-[255px] overflow-hidden rounded-[12px] border bg-[var(--soft)] text-left transition-all",
+                      selected ? "border-[var(--text)] ring-2 ring-[#d9ff65]" : "border-transparent hover:border-[var(--line-strong)]"
+                    )}
                   >
-                    确认选择
+                    <img src={avatar.thumb} alt={avatar.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                    <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 to-transparent" />
+                    {selected && (
+                      <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#d9ff65] text-[#111] shadow-sm">
+                        <Check size={15} strokeWidth={2.8} />
+                      </span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+                      <p className="text-[15px] font-bold">{avatar.name}</p>
+                    </div>
                   </button>
-                </div>
-              </div>
-            </>
-          )}
+                )
+              })}
+            </div>
+
+          </div>
+
+          <footer className="flex items-center justify-between border-t border-[var(--line)] px-6 py-3.5">
+            <p className="text-[12px] text-[var(--muted)]">
+              {selectedAvatar ? `已选择：${selectedAvatar.name}` : "请选择一个数字人"}
+            </p>
+            <button
+              type="button"
+              disabled={!selectedAvatar}
+              onClick={handleConfirm}
+              className="h-9 rounded-full bg-[var(--near-black)] px-5 text-[13px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              确认选择
+            </button>
+          </footer>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

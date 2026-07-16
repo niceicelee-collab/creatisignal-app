@@ -1,196 +1,158 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Check, Coins, Gift, ScrollText, ShoppingBag, Sparkles, TrendingUp } from "lucide-react"
+import { ScrollText, Sparkles } from "lucide-react"
 import { Topbar } from "@/components/layout/topbar"
 import { SettingsShell } from "@/components/settings/settings-shell"
 import { SettingsCard } from "@/components/settings/settings-card"
 import { cn } from "@/lib/utils"
 
-type DailyTask = {
-  id: string
-  label: string
-  reward: number
-  done: boolean
-}
-
-const INITIAL_DAILY: DailyTask[] = [
-  { id: "sign", label: "每日签到",          reward: 20, done: true },
-  { id: "task", label: "完成 1 个 AI 任务", reward: 30, done: true },
-  { id: "invite", label: "邀请 1 位新好友",  reward: 100, done: false },
-  { id: "replicate", label: "完成首次爆款复刻", reward: 50, done: false },
-]
-
-type ShopItem = {
+type LedgerFilter = "全部" | "消耗" | "获得"
+type LedgerDirection = "获得" | "消耗"
+type LedgerEntry = {
   id: string
   title: string
-  desc: string
-  cost: number
-  badge?: string
-}
-
-const SHOP: ShopItem[] = [
-  { id: "pro_trial",  title: "Pro 1 天试用",   desc: "解锁全部高级模型 24h", cost: 100, badge: "热门" },
-  { id: "tmpl_pro",   title: "高级模板 ×1",     desc: "解锁 1 个 Pro 模板",  cost: 50 },
-  { id: "lottery",    title: "抽奖券 ×1",       desc: "周末大转盘抽奖",      cost: 20 },
-  { id: "model_seed", title: "Seedance Pro 单次", desc: "高级视频模型试用",   cost: 80 },
-  { id: "rush",       title: "优先生成队列",     desc: "下次任务 ≤ 30s 出结果", cost: 60 },
-  { id: "boost",      title: "今日 +50% 积分",   desc: "今日所有任务奖励 ×1.5", cost: 40, badge: "限时" },
-]
-
-type LedgerEntry = {
-  ts: string
-  type: "earn" | "spend"
-  source: string
+  direction: LedgerDirection
+  time: string
   delta: number
 }
 
-const LEDGER: LedgerEntry[] = [
-  { ts: "今天 10:24",   type: "earn",  source: "完成 AI 任务", delta: 30  },
-  { ts: "今天 09:18",   type: "earn",  source: "每日签到",     delta: 20  },
-  { ts: "昨天 22:01",   type: "spend", source: "兑换 高级模板", delta: -50 },
-  { ts: "昨天 17:42",   type: "spend", source: "Seedance Pro 单次", delta: -80 },
-  { ts: "昨天 12:09",   type: "earn",  source: "邀请好友 jane.t",  delta: 100 },
-  { ts: "06-17 19:30",  type: "earn",  source: "完成 AI 任务", delta: 30  },
-  { ts: "06-17 11:05",  type: "spend", source: "兑换 Pro 试用 1 天", delta: -100 },
-  { ts: "06-16 23:12",  type: "earn",  source: "活动奖励 月度任务",  delta: 200 },
-  { ts: "06-15 15:48",  type: "earn",  source: "完成 AI 任务", delta: 30  },
-  { ts: "06-15 09:00",  type: "earn",  source: "每日签到",     delta: 20  },
+const BALANCE = {
+  gift: 200,
+  subscription: 0,
+  recharge: 0,
+}
+
+const INITIAL_LEDGER: LedgerEntry[] = [
+  { id: "l1", title: "每日刷新", direction: "获得", time: "2026-07-09 00:00", delta: 200 },
+  { id: "l2", title: "到期清零", direction: "消耗", time: "2026-07-08 23:59", delta: -200 },
+  { id: "l3", title: "生成视频", direction: "消耗", time: "2026-07-08 18:20", delta: -135 },
+  { id: "l3b", title: "创意克隆", direction: "消耗", time: "2026-07-08 18:12", delta: -80 },
+  { id: "l4", title: "生成失败退回", direction: "获得", time: "2026-07-08 18:18", delta: 135 },
+  { id: "l5", title: "新注册用户赠送", direction: "获得", time: "2026-07-07 17:14", delta: 400 },
+  { id: "l6", title: "一次性赠送", direction: "获得", time: "2026-07-06 10:00", delta: 1000 },
+  { id: "l7", title: "到期清零", direction: "消耗", time: "2026-06-12 23:59", delta: -200 },
+  { id: "l8", title: "每日刷新", direction: "获得", time: "2026-06-12 00:00", delta: 200 },
 ]
 
+const LEDGER_FILTERS: LedgerFilter[] = ["全部", "消耗", "获得"]
+
+function formatCredits(value: number) {
+  return Math.abs(value).toLocaleString("zh-CN")
+}
+
+
 export default function CreditsPage() {
-  const [daily, setDaily] = useState(INITIAL_DAILY)
-  const claimableCount = daily.filter((d) => d.done).length
+  const [activeFilter, setActiveFilter] = useState<LedgerFilter>("全部")
+
+  const remainingCredits = BALANCE.gift + BALANCE.subscription + BALANCE.recharge
+  const filteredLedger = INITIAL_LEDGER.filter((item) => {
+    if (activeFilter === "全部") return true
+    return item.direction === activeFilter
+  })
 
   return (
     <>
       <Topbar title="积分" />
-      <SettingsShell title="积分" subtitle="完成日常任务赚积分，用积分解锁高级模型 / 模板。">
-        {/* 余额大卡 */}
-        <SettingsCard icon={Coins} title="当前余额">
-          <div className="flex items-end justify-between flex-wrap gap-3">
-            <div>
-              <p className="text-[42px] font-extrabold text-[var(--text)] leading-none tabular-nums">
-                12,480
-                <span className="text-[14px] text-[var(--muted-2)] font-bold ml-2">积分</span>
-              </p>
-              <p className="text-[11.5px] text-[var(--muted)] mt-2 flex items-center gap-1.5">
-                <TrendingUp size={11} className="text-[#16a34a]" />
-                上月 <span className="font-extrabold text-[#16a34a]">+1,240 (+11%)</span> · 等效约 <span className="font-extrabold text-[var(--text)]">$12.5</span>
-              </p>
-            </div>
-            <div className="rounded-xl bg-[var(--lime-soft)] border border-[#cdf066] px-4 py-3 flex items-center gap-2.5 text-[#3a4b1f]">
-              <Sparkles size={14} className="text-[#5a7821]" />
-              <div>
-                <p className="text-[11px] font-bold">本周可领</p>
-                <p className="text-[15px] font-extrabold leading-none mt-0.5">+{claimableCount * 50} 积分</p>
-              </div>
-            </div>
+      <SettingsShell title="积分">
+        <SettingsCard icon={Sparkles} title="积分余额" allowOverflow>
+          <div className="grid grid-cols-[max-content_minmax(48px,1fr)_max-content_minmax(48px,1fr)_max-content_minmax(48px,1fr)_max-content] items-start gap-0 overflow-visible pb-1">
+            <BalanceFigure label="剩余积分" value={remainingCredits} strong />
+            <FormulaSign label="=" />
+            <BalanceFigure
+              label="赠送积分"
+              value={BALANCE.gift}
+              hint={"默认每日赠送200积分，完成企业认证后，每日赠送800积分\n完成广告账户授权，每日额外赠送200积分"}
+            />
+            <FormulaSign label="+" />
+            <BalanceFigure label="订阅积分" value={BALANCE.subscription} />
+            <FormulaSign label="+" />
+            <BalanceFigure label="充值积分" value={BALANCE.recharge} />
           </div>
         </SettingsCard>
 
-        {/* 每日任务 */}
-        <SettingsCard icon={Calendar} title="每日任务" description="每日 0:00 重置，完成即可领取积分。">
-          <ul className="divide-y divide-[var(--line)]">
-            {daily.map((t) => (
-              <li key={t.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+
+        <SettingsCard icon={ScrollText} title="积分流水" noPad>
+          <div className="px-5 pt-4">
+            <div className="grid grid-cols-3 overflow-hidden rounded-lg bg-[var(--soft)] text-[12.5px] font-bold text-[var(--text)]">
+              {LEDGER_FILTERS.map((filter, index) => (
                 <button
+                  key={filter}
                   type="button"
-                  onClick={() => setDaily((prev) => prev.map((x) => x.id === t.id ? { ...x, done: !x.done } : x))}
+                  onClick={() => setActiveFilter(filter)}
                   className={cn(
-                    "w-5 h-5 rounded-md shrink-0 flex items-center justify-center cursor-pointer transition-colors",
-                    t.done ? "bg-[var(--text)] text-white" : "border border-[var(--line-strong)] bg-white hover:border-[var(--text)]"
+                    "h-10 cursor-pointer border-[var(--line)] transition-colors",
+                    index > 0 && "border-l",
+                    activeFilter === filter ? "bg-white shadow-sm" : "hover:bg-white/70"
                   )}
-                  aria-label="切换完成状态"
                 >
-                  {t.done && <Check size={12} strokeWidth={3} />}
+                  {filter}
                 </button>
-                <p className={cn("flex-1 text-[12.5px] font-bold", t.done ? "text-[var(--muted)] line-through" : "text-[var(--text)]")}>
-                  {t.label}
-                </p>
-                <span className={cn(
-                  "inline-flex items-center gap-1 h-5 px-1.5 rounded-md text-[10.5px] font-extrabold",
-                  t.done ? "bg-[#dcfce7] text-[#15803d]" : "bg-[var(--soft)] text-[var(--muted)]"
-                )}>
-                  +{t.reward} 积分
-                </span>
-              </li>
-            ))}
-          </ul>
-        </SettingsCard>
-
-        {/* 兑换商城 */}
-        <SettingsCard icon={ShoppingBag} title="兑换商城" description="用积分兑换模板、模型与权益。">
-          <div className="grid grid-cols-3 gap-3">
-            {SHOP.map((s) => (
-              <article key={s.id} className="rounded-xl border border-[var(--line)] bg-white p-3 flex flex-col gap-2 relative">
-                {s.badge && (
-                  <span className="absolute -top-2 left-3 inline-flex h-5 px-1.5 rounded-md bg-[#fff7ed] text-[#9a3412] text-[10px] font-extrabold border border-[#fed7aa]">
-                    {s.badge}
-                  </span>
-                )}
-                <div className="w-9 h-9 rounded-lg bg-[var(--lime-soft)] text-[#5a7821] flex items-center justify-center">
-                  <Gift size={14} strokeWidth={2.4} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[12.5px] font-extrabold text-[var(--text)] leading-tight">{s.title}</p>
-                  <p className="text-[10.5px] text-[var(--muted)] mt-1 leading-relaxed">{s.desc}</p>
-                </div>
-                <div className="flex items-center justify-between pt-1.5 border-t border-dashed border-[var(--line)]">
-                  <span className="text-[11.5px] font-extrabold text-[var(--text)] flex items-center gap-1">
-                    <Coins size={11} className="text-[#facc15]" />
-                    {s.cost}
-                  </span>
-                  <button
-                    type="button"
-                    className="h-7 px-2.5 rounded-md bg-[#18181b] text-white text-[11px] font-extrabold cursor-pointer hover:opacity-90"
-                  >
-                    兑换
-                  </button>
-                </div>
-              </article>
-            ))}
+              ))}
+            </div>
           </div>
-        </SettingsCard>
 
-        {/* 明细 */}
-        <SettingsCard icon={ScrollText} title="积分明细" noPad>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12.5px]">
-              <thead>
-                <tr className="border-b border-[var(--line)] text-[var(--muted)] text-[11px] font-extrabold uppercase tracking-wide">
-                  <th className="text-left px-5 py-2.5">时间</th>
-                  <th className="text-left px-5 py-2.5">来源</th>
-                  <th className="text-center px-5 py-2.5">类型</th>
-                  <th className="text-right px-5 py-2.5">变动</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LEDGER.map((l, i) => (
-                  <tr key={i} className={i > 0 ? "border-t border-[var(--line)]" : ""}>
-                    <td className="px-5 py-2.5 text-[var(--muted)]">{l.ts}</td>
-                    <td className="px-5 py-2.5 text-[var(--text)] font-bold">{l.source}</td>
-                    <td className="px-5 py-2.5 text-center">
-                      <span className={cn(
-                        "inline-flex items-center h-5 px-1.5 rounded-md text-[10.5px] font-extrabold",
-                        l.type === "earn" ? "bg-[#dcfce7] text-[#15803d]" : "bg-[#fee2e2] text-[#b91c1c]"
-                      )}>
-                        {l.type === "earn" ? "收入" : "支出"}
-                      </span>
-                    </td>
-                    <td className={cn(
-                      "px-5 py-2.5 text-right tabular-nums font-extrabold",
-                      l.delta > 0 ? "text-[#15803d]" : "text-[#b91c1c]"
-                    )}>
-                      {l.delta > 0 ? "+" : ""}{l.delta}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="px-5 py-4">
+            <ul className="divide-y divide-transparent">
+              {filteredLedger.map((item) => (
+                <li key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-extrabold text-[var(--text)] leading-tight">{item.title}</p>
+                    <p className="mt-1 text-[12px] font-medium text-[#8b98a9] tabular-nums">{item.time}</p>
+                  </div>
+                  <p
+                    className={cn(
+                      "text-[16px] font-semibold tabular-nums",
+                      item.delta > 0 ? "text-[#008fbe]" : "text-[var(--text)]"
+                    )}
+                  >
+                    {item.delta > 0 ? "+" : "-"}{formatCredits(item.delta)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            {filteredLedger.length === 0 && (
+              <p className="py-8 text-center text-[12px] text-[var(--muted)]">暂无流水</p>
+            )}
+            <p className="pt-5 text-center text-[12px] font-medium text-[#a6b0bd]">仅展示近一个月流水明细</p>
           </div>
         </SettingsCard>
       </SettingsShell>
     </>
   )
+}
+
+function BalanceFigure({
+  label,
+  value,
+  strong,
+  hint,
+}: {
+  label: string
+  value: number
+  strong?: boolean
+  hint?: string
+}) {
+  return (
+    <div className="w-max min-w-0">
+      <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#4b5563]">
+        <span>{label}</span>
+        {hint && (
+          <span className="group relative z-30 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-[#d5dde8] bg-white text-[10px] font-bold leading-none text-[#8da0b4]">
+            i
+            <span className="pointer-events-none absolute left-1/2 top-5 z-50 hidden w-[360px] -translate-x-1/2 whitespace-pre-line rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-left text-[12px] font-medium leading-relaxed text-[#4b5563] shadow-[0_12px_28px_rgba(9,9,11,0.14)] group-hover:block">
+              {hint}
+            </span>
+          </span>
+        )}
+      </div>
+      <p className={cn("mt-2 text-[22px] leading-none tabular-nums text-[var(--text)]", strong ? "font-extrabold" : "font-bold")}>
+        {formatCredits(value)}
+      </p>
+    </div>
+  )
+}
+
+function FormulaSign({ label }: { label: "=" | "+" }) {
+  return <span className="inline-flex h-[18px] w-full items-center justify-center text-[16px] font-bold leading-none text-[#a6b0bd]">{label}</span>
 }

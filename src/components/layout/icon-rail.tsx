@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Fragment } from "react"
-import { PanelLeftOpen } from "lucide-react"
+import { PanelLeftOpen, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { findActiveSubMenuHref, navSections, getSectionByPath, type NavSection } from "@/lib/nav-config"
 import { useSidebarCollapsed } from "@/lib/layout/sidebar-state"
@@ -15,7 +15,7 @@ export function IconRail() {
   const { collapsed, toggle } = useSidebarCollapsed()
 
   return (
-    <aside className="w-12 border-r border-[var(--line)] bg-[var(--panel)] flex flex-col items-center py-3 gap-4 shrink-0">
+    <aside className="sticky top-0 h-screen w-12 border-r border-[var(--line)] bg-[var(--panel)] flex flex-col items-center py-3 gap-4 shrink-0">
       {collapsed ? (
         <button
           type="button"
@@ -49,7 +49,31 @@ export function IconRail() {
         </Fragment>
       ))}
       <div className="flex-1" />
+      <RailAccountSummary />
     </aside>
+  )
+}
+
+function RailAccountSummary() {
+  return (
+    <div className="flex flex-col items-center gap-2 pb-1">
+      <Link
+        href="/settings/credits"
+        aria-label="剩余积分 200"
+        className="group relative inline-flex h-[40px] w-[40px] flex-col items-center justify-center rounded-lg border border-[var(--line)] bg-white text-[#18181b] shadow-[0_6px_18px_rgba(9,9,11,0.08)] transition-colors hover:border-[#d1d5db]"
+      >
+        <Sparkles size={10} strokeWidth={2.4} />
+        <span className="mt-1 text-[12px] font-extrabold leading-none tabular-nums">200</span>
+      </Link>
+      <Link
+        href="/settings/account"
+        aria-label="用户账号 Default"
+        className="group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white bg-[linear-gradient(135deg,#9ee7ff_0%,#77b7ff_44%,#7c3aed_100%)] text-[13px] font-extrabold text-white shadow-[0_8px_22px_rgba(59,130,246,0.28)] ring-1 ring-[rgba(9,9,11,0.08)]"
+      >
+        D
+        <SimpleTooltip>Default</SimpleTooltip>
+      </Link>
+    </div>
   )
 }
 

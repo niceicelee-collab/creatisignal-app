@@ -29,7 +29,7 @@ export function Sidebar() {
   const hasSubMenu = activeSection.subMenu.length > 0
 
   return (
-    <aside className="w-[260px] border-r border-[var(--line)] bg-[var(--panel)] p-[10px] shrink-0">
+    <aside className="sticky top-0 flex h-screen w-[260px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--panel)] p-[10px]">
       <div className="h-9 flex items-center gap-1">
         <ProjectSwitcher />
         <button

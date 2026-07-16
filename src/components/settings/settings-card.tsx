@@ -10,13 +10,14 @@ interface Props {
   actions?: React.ReactNode
   children: React.ReactNode
   noPad?: boolean        // true 时 body 不加 padding（给表格用）
+  allowOverflow?: boolean
 }
 
-export function SettingsCard({ icon: Icon, title, description, actions, children, noPad }: Props) {
+export function SettingsCard({ icon: Icon, title, description, actions, children, noPad, allowOverflow }: Props) {
   return (
-    <section className="rounded-2xl border border-[var(--line)] bg-white overflow-hidden">
+    <section className={["rounded-2xl border border-[var(--line)] bg-white", allowOverflow ? "overflow-visible" : "overflow-hidden"].join(" ")}>
       <header className="px-5 pt-4 pb-3 border-b border-[var(--line)] flex items-start justify-between gap-3">
-        <div className="min-w-0 flex items-start gap-2.5">
+        <div className={["min-w-0 flex gap-2.5", description ? "items-start" : "items-center"].join(" ")}>
           {Icon && (
             <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--soft)] text-[var(--text)] shrink-0">
               <Icon size={14} strokeWidth={2.2} />

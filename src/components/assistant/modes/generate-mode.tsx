@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Video, Image, Link2, Wand2, Plus, ChevronDown, SlidersHorizontal, Hash, Star, X, Play } from "lucide-react"
+import { Video, Image, UserRound, ChevronDown, SlidersHorizontal, Sparkles, Star, X, Play } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SendButton } from "../send-button"
 import { ImageSelectModal, type ImageItem } from "@/components/modals/image-select-modal"
@@ -11,15 +11,7 @@ import { DigitalHumanModal, type DHItem } from "@/components/modals/digital-huma
 // ─── Types & Data ────────────────────────────────────────────────────────────
 
 type GenType = "video" | "image" | "remix" | "reverse"
-type VideoMode = "reference" | "frames"
-type ActivePopup = "genType" | "model" | "settings" | "count" | null
-
-const genTypes = [
-  { id: "video" as GenType, label: "视频生成", icon: Video },
-  { id: "image" as GenType, label: "图片生成", icon: Image },
-  { id: "remix" as GenType, label: "爆款复刻", icon: Link2 },
-  { id: "reverse" as GenType, label: "提示词反推", icon: Wand2 },
-]
+type ActivePopup = "model" | "hook" | "settings" | null
 
 const videoModels = ["Seedance 2", "Seedance 1 Pro", "Veo 3", "Kling 2.1"]
 const imageModels = ["Nano Banana Pro", "GPT Image 1", "Seedream 4.0"]
@@ -29,6 +21,145 @@ const VIDEO_RESOLUTIONS = ["480P", "720P"]
 const IMAGE_RESOLUTIONS = ["1K", "2K", "4K"]
 const VIDEO_RATIOS = ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16", "自动"]
 const IMAGE_RATIOS = ["Auto", "1:1", "3:4", "4:3", "9:16", "16:9", "21:9"]
+
+const HOOK_CATEGORIES = ["全部", "推荐", "高打断", "建立信任", "教程演示", "UGC自然", "产品卖点"] as const
+
+type HookCategory = (typeof HOOK_CATEGORIES)[number]
+type HookPattern = {
+  id: string
+  category: Exclude<HookCategory, "全部">
+  title: string
+  desc: string
+  prompt: string
+  image: string
+  tag: string
+}
+
+const HOOK_PATTERNS: HookPattern[] = [
+  {
+    id: "result-first",
+    category: "推荐",
+    title: "结果前置",
+    desc: "一位自信的人物通过充满表现力的动作亮出产品，随后介绍产品的核心优势。",
+    prompt: "开场先展示最惊艳的最终效果，随后用一句话说明产品如何带来这个结果。",
+    image: "https://picsum.photos/seed/hook-result-first/420/560",
+    tag: "强转化",
+  },
+  {
+    id: "pain-question",
+    category: "推荐",
+    title: "痛点反问",
+    desc: "用一个扎心问题，让目标用户立刻代入。",
+    prompt: "开场用一个用户正在经历的痛点反问，引导观众意识到自己需要这个解决方案。",
+    image: "https://picsum.photos/seed/hook-pain-question/420/560",
+    tag: "强共鸣",
+  },
+  {
+    id: "fail-moment",
+    category: "高打断",
+    title: "翻车瞬间",
+    desc: "先出现失败或尴尬画面，再给解决方法。",
+    prompt: "第一幕展示一次明显失败或尴尬的使用场景，紧接着切到产品解决问题的画面。",
+    image: "https://picsum.photos/seed/hook-fail-moment/420/560",
+    tag: "停滑",
+  },
+  {
+    id: "falling-object",
+    category: "高打断",
+    title: "突然入画",
+    desc: "物体突然落入画面，制造视觉中断。",
+    prompt: "开场让关键物体突然进入画面或被快速推近镜头，制造视觉打断后展示产品卖点。",
+    image: "https://picsum.photos/seed/hook-falling-object/420/560",
+    tag: "视觉冲击",
+  },
+  {
+    id: "street-proof",
+    category: "建立信任",
+    title: "真人证言",
+    desc: "像路人/用户一句话背书，降低怀疑。",
+    prompt: "以真实用户口吻开场，说出购买前的顾虑和使用后的具体变化。",
+    image: "https://picsum.photos/seed/hook-street-proof/420/560",
+    tag: "信任感",
+  },
+  {
+    id: "comment-reply",
+    category: "建立信任",
+    title: "评论回复",
+    desc: "用一条高频评论引出产品证明。",
+    prompt: "开场展示一条用户质疑评论，然后用产品实拍和细节证明回应这条评论。",
+    image: "https://picsum.photos/seed/hook-comment-reply/420/560",
+    tag: "社证",
+  },
+  {
+    id: "three-step",
+    category: "教程演示",
+    title: "三步演示",
+    desc: "把复杂卖点拆成 3 个简单动作。",
+    prompt: "开场承诺三步看懂产品使用方法，然后用清晰分镜展示每一步。",
+    image: "https://picsum.photos/seed/hook-three-step/420/560",
+    tag: "易理解",
+  },
+  {
+    id: "before-after",
+    category: "产品卖点",
+    title: "前后对比",
+    desc: "同场景展示使用前和使用后的差异。",
+    prompt: "开场用前后对比画面展示产品带来的明显变化，并突出最核心的一个卖点。",
+    image: "https://picsum.photos/seed/hook-before-after/420/560",
+    tag: "强证明",
+  },
+  {
+    id: "close-detail",
+    category: "产品卖点",
+    title: "细节特写",
+    desc: "用超近景展示材质、效果或关键结构。",
+    prompt: "第一镜头使用产品细节特写，放大材质、结构或效果，让观众先被画面质感吸引。",
+    image: "https://picsum.photos/seed/hook-close-detail/420/560",
+    tag: "质感",
+  },
+  {
+    id: "friend-share",
+    category: "UGC自然",
+    title: "朋友安利",
+    desc: "像朋友分享一样自然说出使用感受。",
+    prompt: "开场用朋友聊天式口吻介绍产品，语气自然，先说真实使用感受再补充卖点。",
+    image: "https://picsum.photos/seed/hook-friend-share/420/560",
+    tag: "自然口播",
+  },
+]
+
+const VIDEO_POINT_RATES: Record<string, Record<string, number>> = {
+  "Seedance 2": { "480P": 6, "720P": 9 },
+  "Seedance 1 Pro": { "480P": 5, "720P": 8 },
+  "Veo 3": { "480P": 18, "720P": 28 },
+  "Kling 2.1": { "480P": 8, "720P": 12 },
+}
+
+const IMAGE_POINT_COSTS: Record<string, Record<string, number>> = {
+  "Nano Banana Pro": { "1K": 60, "2K": 120, "4K": 240 },
+  "GPT Image 1": { "1K": 50, "2K": 100, "4K": 200 },
+  "Seedream 4.0": { "1K": 40, "2K": 80, "4K": 160 },
+}
+
+function getSignalPointCost({
+  genType,
+  model,
+  videoResolution,
+  videoDuration,
+  imageResolution,
+}: {
+  genType: GenType
+  model: string
+  videoResolution: string
+  videoDuration: number
+  imageResolution: string
+}) {
+  if (genType === "image") return IMAGE_POINT_COSTS[model]?.[imageResolution] ?? 60
+  if (genType === "reverse") return 20
+
+  const pointsPerSecond = VIDEO_POINT_RATES[model]?.[videoResolution] ?? 9
+  return pointsPerSecond * videoDuration
+}
 
 function getRectDims(ratio: string, maxDim: number): { w: number; h: number } | null {
   if (ratio === "自动" || ratio === "Auto") return null
@@ -61,20 +192,28 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-[11px] font-semibold text-[var(--muted)] mb-2 tracking-wide">{children}</p>
 }
 
-// ─── Popups ──────────────────────────────────────────────────────────────────
-
-function GenTypePopup({ value, onChange }: { value: GenType; onChange: (v: GenType) => void }) {
+function TargetArrowIcon({ size = 14, strokeWidth = 2.1 }: { size?: number; strokeWidth?: number }) {
   return (
-    <PopupCard className="w-[176px] p-1.5">
-      {genTypes.map(({ id, label, icon: Icon }) => (
-        <button key={id} type="button" onClick={() => onChange(id)}
-          className={cn("w-full h-[34px] rounded-[9px] text-left px-[9px] flex items-center gap-2 text-[13px] font-[650] cursor-pointer", value === id ? "bg-[var(--soft)]" : "hover:bg-[var(--soft)]")}>
-          <Icon size={14} strokeWidth={2} />{label}
-        </button>
-      ))}
-    </PopupCard>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="10" cy="14" r="7" />
+      <circle cx="10" cy="14" r="3" />
+      <path d="M10 14 20 4" />
+      <path d="M15.5 4H20v4.5" />
+    </svg>
   )
 }
+
+// ─── Popups ──────────────────────────────────────────────────────────────────
 
 function ModelPopup({ options, selected, onSelect }: { options: string[]; selected: string; onSelect: (v: string) => void }) {
   return (
@@ -87,6 +226,130 @@ function ModelPopup({ options, selected, onSelect }: { options: string[]; select
         </button>
       ))}
     </PopupCard>
+  )
+}
+
+function HookPopup({ onApply, onClose, initialHookId }: { onApply: (hook: HookPattern) => void; onClose: () => void; initialHookId?: string }) {
+  const [activeCategory, setActiveCategory] = useState<HookCategory>("推荐")
+  const [selectedHookId, setSelectedHookId] = useState(initialHookId ?? HOOK_PATTERNS[0].id)
+
+  const visibleHooks = activeCategory === "全部"
+    ? HOOK_PATTERNS
+    : HOOK_PATTERNS.filter((hook) => hook.category === activeCategory)
+  const selectedHook = HOOK_PATTERNS.find((hook) => hook.id === selectedHookId) ?? HOOK_PATTERNS[0]
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0f172a]/35 p-5 backdrop-blur-[8px]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Hook选择"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex max-h-[88vh] w-[min(1120px,calc(100vw-40px))] flex-col overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.28)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="关闭 Hook 弹窗"
+          className="absolute right-5 top-5 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-white/90 text-[#6f7480] shadow-sm transition-colors hover:text-[var(--text)]"
+        >
+          <X size={16} strokeWidth={2.2} />
+        </button>
+
+        <div className="grid gap-5 px-7 pb-4 pt-7 md:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="min-w-0">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--lime-soft)] text-[#4a641b]">
+              <TargetArrowIcon size={20} strokeWidth={2.1} />
+            </div>
+            <h3 className="whitespace-nowrap text-[32px] font-black leading-[1.08] tracking-[-0.02em] text-[var(--text)]">选择一个能让吸引用户注意力的Hook</h3>
+            <p className="mt-3 max-w-[560px] text-[15px] font-medium leading-relaxed text-[var(--muted)]">选择第一幕的开场结构，系统自动把它应用到当前创意提示词里。</p>
+          </div>
+
+          <div className="hidden items-start justify-end gap-[-18px] md:flex">
+            {HOOK_PATTERNS.slice(0, 3).map((hook, index) => (
+              <div
+                key={hook.id}
+                className={cn(
+                  "h-[132px] w-[96px] overflow-hidden rounded-2xl border border-white bg-cover bg-center shadow-[0_18px_38px_rgba(15,23,42,0.18)]",
+                  index === 0 && "rotate-[-9deg] opacity-70",
+                  index === 1 && "z-10 scale-110",
+                  index === 2 && "rotate-[8deg] opacity-80"
+                )}
+                style={{ backgroundImage: "url('" + hook.image + "')" }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto px-7 pb-4">
+          {HOOK_CATEGORIES.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setActiveCategory(category)}
+              className={cn(
+                "h-9 shrink-0 rounded-full border px-4 text-[13px] font-bold transition-colors",
+                activeCategory === category
+                  ? "border-[#18181b] bg-[#18181b] text-white"
+                  : "border-[var(--line)] bg-white text-[#6f7480] hover:border-[#c7cdd6] hover:text-[var(--text)]"
+              )}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid flex-1 grid-cols-[repeat(auto-fill,minmax(166px,1fr))] gap-3 overflow-y-auto px-7 pb-5">
+          {visibleHooks.map((hook) => {
+            const selected = hook.id === selectedHook.id
+            return (
+              <button
+                key={hook.id}
+                type="button"
+                onClick={() => setSelectedHookId(hook.id)}
+                className={cn(
+                  "group overflow-hidden rounded-2xl border bg-white text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(15,23,42,0.14)]",
+                  selected ? "border-[#18181b] shadow-[0_0_0_2px_rgba(24,24,27,0.08)]" : "border-[var(--line)]"
+                )}
+              >
+                <div
+                  className="relative aspect-[4/5] bg-cover bg-center"
+                  style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0) 48%, rgba(0,0,0,0.45) 100%), url('" + hook.image + "')" }}
+                >
+                  <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-extrabold text-[#18181b] shadow-sm">{hook.tag}</span>
+                  <span className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm">
+                    <TargetArrowIcon size={13} strokeWidth={2.1} />
+                  </span>
+                  <span className="absolute bottom-2 left-2 right-2 text-[11px] font-bold leading-tight text-white/95">{hook.category}</span>
+                </div>
+                <div className="p-3">
+                  <p className="truncate text-[14px] font-extrabold text-[var(--text)]">{hook.title}</p>
+                  <p className="mt-1 h-[34px] overflow-hidden text-[12px] font-medium leading-[1.4] text-[var(--muted)]">{hook.desc}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-[var(--line)] bg-[#fafafa] px-7 py-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <p className="text-[12px] font-bold text-[#8b98a9]">已选 Hook</p>
+            <p className="mt-1 text-[13px] font-extrabold text-[var(--text)]">{selectedHook.title}</p>
+            <p className="mt-1 max-w-[720px] text-[12px] font-medium leading-relaxed text-[var(--muted)]">{selectedHook.prompt}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onApply(selectedHook)}
+            className="h-10 shrink-0 rounded-full bg-[var(--lime)] px-5 text-[13px] font-extrabold text-[#1a2010] shadow-[0_10px_24px_rgba(185,255,45,0.35)] transition-transform hover:-translate-y-0.5"
+          >
+            使用此 Hook
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -172,30 +435,14 @@ function ImageSettingsPopup({ resolution, setResolution, ratio, setRatio }: {
   )
 }
 
-function CountPopup({ count, setCount, unit }: { count: number; setCount: (v: number) => void; unit: "条" | "张" }) {
-  return (
-    <PopupCard className="w-[100px] p-1.5">
-      {[1, 2, 3, 4].map((n) => (
-        <button key={n} type="button" onClick={() => setCount(n)}
-          className={cn("w-full h-9 rounded-[9px] text-left px-3 text-[13px] font-medium cursor-pointer transition-colors",
-            count === n ? "bg-[var(--soft)] text-[var(--text)] font-semibold" : "text-[var(--muted)] hover:bg-[var(--soft)]")}>
-          {n}{unit}
-        </button>
-      ))}
-    </PopupCard>
-  )
-}
-
-// ─── Media thumbnail ──────────────────────────────────────────────────────────
-
 function MediaThumb({ src, type, label, onRemove }: {
-  src: string; type: "image" | "video" | "dh"; label?: string; onRemove: () => void
+  src: string; type: "image" | "video"; label?: string; onRemove: () => void
 }) {
   return (
     <div className="relative shrink-0 group">
       <div className={cn(
         "overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--soft)]",
-        type === "video" ? "w-[60px] h-[38px]" : type === "dh" ? "w-[30px] h-[42px]" : "w-[42px] h-[42px]"
+        type === "video" ? "w-[60px] h-[38px]" : "w-[42px] h-[42px]"
       )}>
         <img src={src} alt={label} className="w-full h-full object-cover" />
         {type === "video" && (
@@ -239,24 +486,25 @@ interface GenerateModeProps {
 }
 
 export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateModeProps = {}) {
-  const [genType, setGenType] = useState<GenType>("video")
-  const [videoMode, setVideoMode] = useState<VideoMode>("reference")
+  const [genType] = useState<GenType>("video")
   const [text, setText] = useState("")
   const [activePopup, setActivePopup] = useState<ActivePopup>(null)
+  const [selectedHook, setSelectedHook] = useState<HookPattern | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Pre-fill from props (e.g. OnboardingHero path B click)
   useEffect(() => {
     if (!initialPrompt) return
-    setGenType("video")
-    setText(initialPrompt)
-    // Focus + move cursor to end on next tick
-    window.setTimeout(() => {
-      const el = textareaRef.current
-      if (!el) return
-      el.focus()
-      el.selectionStart = el.selectionEnd = el.value.length
+    const timer = window.setTimeout(() => {
+      setText(initialPrompt)
+      window.requestAnimationFrame(() => {
+        const el = textareaRef.current
+        if (!el) return
+        el.focus()
+        el.selectionStart = el.selectionEnd = el.value.length
+      })
     }, 0)
+    return () => window.clearTimeout(timer)
   }, [initialPrompt])
 
   function handleSend() {
@@ -276,8 +524,6 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
   // Model
   const [model, setModel] = useState(videoModels[0])
 
-  // Count
-  const [count, setCount] = useState(1)
 
   // Selected media
   const [selectedImages, setSelectedImages] = useState<ImageItem[]>([])
@@ -302,18 +548,16 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
 
   const toggle = (popup: ActivePopup) => setActivePopup((prev) => (prev === popup ? null : popup))
 
-  const handleGenTypeChange = (v: GenType) => {
-    setGenType(v)
-    setActivePopup(null)
-    setCount(1)
-    const opts = v === "image" ? imageModels : v === "reverse" ? reverseModels : videoModels
-    setModel(opts[0])
-  }
-
   const models = genType === "image" ? imageModels : genType === "reverse" ? reverseModels : videoModels
   const maxLen = genType === "video" ? 8000 : 2000
-  const countUnit = genType === "image" ? "张" : "条"
   const settingsLabel = genType === "image" ? `${imageResolution} · ${imageRatio}` : `${videoResolution} · ${videoRatio} · ${videoDuration}s`
+  const signalPointCost = getSignalPointCost({
+    genType,
+    model,
+    videoResolution,
+    videoDuration,
+    imageResolution,
+  })
 
   const placeholders: Record<GenType, string> = {
     video: "描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频",
@@ -322,38 +566,40 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
     reverse: "贴入视频链接，或上传图片 / 视频，反推出可复用提示词",
   }
 
-  const hasMedia = selectedImages.length > 0 || selectedVideos.length > 0 || !!digitalHuman
+  const hasMedia = selectedImages.length > 0 || selectedVideos.length > 0
 
   return (
     <div className="flex flex-col gap-3.5">
-      {/* Video mode tabs */}
-      {genType === "video" && (
-        <div className="flex items-center gap-[3px] border border-[var(--line)] rounded-full bg-[var(--soft)] p-[3px] w-max">
-          {(["reference", "frames"] as VideoMode[]).map((m) => (
-            <button key={m} type="button" onClick={() => setVideoMode(m)}
-              className={cn("h-7 rounded-full px-2.5 text-[12px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors whitespace-nowrap",
-                videoMode === m ? "bg-white text-[#18181b] shadow-[0_1px_2px_rgba(9,9,11,0.08)]" : "bg-transparent text-[var(--muted)]")}>
-              {m === "reference" ? <><Image size={12} />参考</> : <><Hash size={12} />首尾帧</>}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Upload slots + input area */}
       <div className="flex items-start gap-3.5 min-h-[52px]">
         {/* Upload slots */}
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
-          {genType === "video" && videoMode === "reference" && (
+          {genType === "video" && (
             <>
               <UploadSlot label="图片" icon={Image} onClick={() => setImageModalOpen(true)} />
               <UploadSlot label="视频" icon={Video} onClick={() => setVideoModalOpen(true)} />
-              <UploadSlot label="数字人" icon={Plus} onClick={() => setDhModalOpen(true)} />
-            </>
-          )}
-          {genType === "video" && videoMode === "frames" && (
-            <>
-              <UploadSlot label="首帧" icon={Plus} onClick={() => setImageModalOpen(true)} />
-              <UploadSlot label="尾帧" icon={Plus} onClick={() => setImageModalOpen(true)} />
+              {digitalHuman ? (
+                <div className="relative h-[40px] w-[40px] shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setDhModalOpen(true)}
+                    aria-label="更换数字人"
+                    className="h-full w-full overflow-hidden rounded-[10px] border border-[var(--line)] bg-[var(--soft)]"
+                  >
+                    <img src={digitalHuman.thumb} alt={digitalHuman.name} className="h-full w-full object-cover" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDigitalHuman(null)}
+                    aria-label="移除数字人"
+                    className="absolute -right-1.5 -top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-[#18181b] text-white shadow-sm hover:bg-[#444]"
+                  >
+                    <X size={8} strokeWidth={2.5} />
+                  </button>
+                </div>
+              ) : (
+                <UploadSlot label="数字人" icon={UserRound} onClick={() => setDhModalOpen(true)} />
+              )}
             </>
           )}
           {genType === "image" && <UploadSlot label="图片" icon={Image} onClick={() => setImageModalOpen(true)} />}
@@ -378,18 +624,21 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
                   onRemove={() => setSelectedVideos((prev) => prev.filter((v) => v.id !== vid.id))}
                 />
               ))}
-              {digitalHuman && (
-                <MediaThumb
-                  src={digitalHuman.thumb} type="dh" label={digitalHuman.name}
-                  onRemove={() => setDigitalHuman(null)}
-                />
-              )}
             </div>
+          )}
+          {selectedHook && (
+            <p className="w-full text-[14px] font-medium leading-6 text-[#667085]" aria-label="Hook 描述">
+              前3s Hook：{selectedHook.desc}
+            </p>
           )}
           <textarea
             ref={textareaRef}
-            className="w-full min-h-[52px] border-0 outline-none resize-none text-[#24272f] text-[15px] leading-[1.5] bg-transparent placeholder:text-[var(--muted-2)]"
-            placeholder={placeholders[genType]}
+            className={cn(
+              "w-full outline-none resize-none text-[#24272f] text-[15px] leading-[1.5] bg-transparent placeholder:text-[var(--muted-2)]",
+              selectedHook ? "min-h-[48px] border-0 px-0 py-0" : "min-h-[52px] border-0"
+            )}
+            aria-label={selectedHook ? "3秒后画面描述" : undefined}
+            placeholder={selectedHook ? "描述3s后的画面内容和动态过程，适用@指定模特、参考图或参考视频" : placeholders[genType]}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={maxLen}
@@ -401,16 +650,6 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
       {/* Config row */}
       <div ref={configRef} className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-
-          {/* Gen type */}
-          <div className="relative">
-            <button type="button" onClick={() => toggle("genType")} className={pickerBtn}>
-              {(() => { const { icon: Icon, label } = genTypes.find((t) => t.id === genType)!; return <><Icon size={15} strokeWidth={2} /><span>{label}</span></> })()}
-              <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "genType" && "rotate-180")} />
-            </button>
-            {activePopup === "genType" && <GenTypePopup value={genType} onChange={handleGenTypeChange} />}
-          </div>
-
           {/* Model */}
           <div className="relative">
             <button type="button" onClick={() => toggle("model")} className={pickerBtn}>
@@ -420,6 +659,29 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
             </button>
             {activePopup === "model" && (
               <ModelPopup options={models} selected={model} onSelect={(v) => { setModel(v); setActivePopup(null) }} />
+            )}
+          </div>
+
+          {/* Hook */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => toggle("hook")}
+              className={cn(pickerBtn, "w-[112px] overflow-hidden", selectedHook && "bg-[#eff8ff] text-[#0a84d8]")}
+            >
+              <TargetArrowIcon size={14} strokeWidth={2.1} />
+              <span className="min-w-0 flex-1 truncate text-left">{selectedHook?.title ?? "Hook"}</span>
+              <ChevronDown size={12} className={cn("-ml-0.5 shrink-0 transition-transform", selectedHook ? "text-[#0a84d8]" : "text-[var(--muted)]", activePopup === "hook" && "rotate-180")} />
+            </button>
+            {activePopup === "hook" && (
+              <HookPopup
+                onApply={(hook) => {
+                  setSelectedHook(hook)
+                  setActivePopup(null)
+                }}
+                onClose={() => setActivePopup(null)}
+                initialHookId={selectedHook?.id}
+              />
             )}
           </div>
 
@@ -449,24 +711,17 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
             </div>
           )}
 
-          {/* Count */}
-          {genType !== "reverse" && (
-            <div className="relative">
-              <button type="button" onClick={() => toggle("count")} className={pickerBtn}>
-                <Hash size={15} strokeWidth={2} />
-                <span>生成 {count} {countUnit}</span>
-                <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "count" && "rotate-180")} />
-              </button>
-              {activePopup === "count" && (
-                <CountPopup count={count} setCount={(n) => { setCount(n); setActivePopup(null) }} unit={countUnit} />
-              )}
-            </div>
-          )}
 
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[13px] text-[#8a8d94] whitespace-nowrap">{text.length}/{maxLen}</span>
+          <span
+            className="inline-flex items-center gap-1 text-[14px] font-semibold text-[#6f7480] tabular-nums whitespace-nowrap"
+            title={`预计消耗 ${signalPointCost.toLocaleString("zh-CN")} 积分`}
+          >
+            <Sparkles size={14} strokeWidth={2.4} />
+            {signalPointCost.toLocaleString("zh-CN")}
+          </span>
           <SendButton disabled={!text.trim()} loading={submitting} onClick={handleSend} />
         </div>
       </div>
