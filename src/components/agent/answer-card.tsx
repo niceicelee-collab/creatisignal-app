@@ -19,7 +19,7 @@ import type { AgentAnswer, AnswerActionKind } from "@/lib/agent/state"
 const ACTION_META: Record<AnswerActionKind, { label: string; icon: typeof Bookmark; primary?: boolean }> = {
   save_to_library: { label: "保存到资产库", icon: Bookmark },
   next_brief:      { label: "生成下一轮 Brief", icon: Sparkles, primary: true },
-  go_replicate:    { label: "进入爆款复刻", icon: GitBranch },
+  go_replicate:    { label: "进入高保真复刻", icon: GitBranch },
 }
 
 const SUGGESTION_TONE: Record<"violet" | "amber" | "blue" | "green", { bg: string; color: string }> = {

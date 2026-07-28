@@ -59,7 +59,7 @@ const REVERSE_PROMPT = `帮我做一条 22 秒的菲律宾普惠金融短视频�
 卖点优先级：1) 月供低 2) 5 分钟到账 3) SEC 持牌合规
 禁忌：避免对利率做承诺、避免对比竞品、保留法律免责声明`
 
-// 建议动作（后两项为外链 a；进入爆款复刻在组件内单独渲染为 button，触发抽屉）
+// 建议动作（后两项为外链 a；进入高保真复刻在组件内单独渲染为 button，触发抽屉）
 const LINK_ACTIONS = [
   { label: "保存到资产库",     icon: Bookmark, href: "/assets/uploaded" },
   { label: "重新分析一遍",     icon: RefreshCw, href: "/assistant" },
@@ -160,7 +160,7 @@ export function AnalysisDetail({ data, title = "高 CTR 素材分析", generated
                 </span>
               </p>
               <div className="space-y-1.5">
-                {/* 进入爆款复刻 —— 抽屉触发 */}
+                {/* 进入高保真复刻 —— 抽屉触发 */}
                 <button
                   type="button"
                   onClick={() => setReplicateOpen(true)}
@@ -169,7 +169,7 @@ export function AnalysisDetail({ data, title = "高 CTR 素材分析", generated
                   <span className="w-6 h-6 rounded-md bg-[var(--soft)] text-[var(--text)] flex items-center justify-center shrink-0">
                     <Zap size={11} strokeWidth={2.4} />
                   </span>
-                  <span className="flex-1 text-[12px] font-extrabold text-[var(--text)]">进入爆款复刻 →</span>
+                  <span className="flex-1 text-[12px] font-extrabold text-[var(--text)]">进入高保真复刻 →</span>
                 </button>
                 {/* 其余外链 */}
                 {LINK_ACTIONS.map((a) => (
@@ -224,7 +224,7 @@ export function AnalysisDetail({ data, title = "高 CTR 素材分析", generated
         </div>
       </div>
 
-      {/* 进入爆款复刻 —— 右侧抽屉 */}
+      {/* 进入高保真复刻 —— 右侧抽屉 */}
       <EnterReplicateDrawer
         open={replicateOpen}
         onClose={() => setReplicateOpen(false)}

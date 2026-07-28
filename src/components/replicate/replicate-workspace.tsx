@@ -101,7 +101,7 @@ function Inner({ material, productSkuFromQuery, sourceFromQuery, initialStep, pr
     return { sellingPointMode: "manual" }
   })
 
-  // 从「创意分析 → 进入爆款复刻」抽屉传入的 brief —— mount 一次性接收
+  // 从「创意分析 → 进入高保真复刻」抽屉传入的 brief —— mount 一次性接收
   // key 需与 enter-replicate-drawer.tsx 中 REPLICATE_HANDOFF_KEY 保持一致
   useEffect(() => {
     if (typeof window === "undefined") return

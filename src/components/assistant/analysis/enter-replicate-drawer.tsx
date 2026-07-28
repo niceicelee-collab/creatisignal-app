@@ -14,7 +14,7 @@ interface Props {
   onClose: () => void
 }
 
-// 从创意分析跳入爆款复刻时使用的默认参考素材（与 hub 的 REPLICA_PROJECT_FALLBACK_FP 对齐）
+// 从创意分析跳入高保真复刻时使用的默认参考素材（与 hub 的 REPLICA_PROJECT_FALLBACK_FP 对齐）
 const DEFAULT_REFERENCE_FP = "fp_001"
 
 // 抽屉 → workspace 之间传递商品 brief 的 sessionStorage key
@@ -87,7 +87,7 @@ export function EnterReplicateDrawer({ open, onClose }: Props) {
               onClick={handleEnter}
               className={cn(rainbowButtonClassName, "h-11 rounded-xl px-5 text-[13px]")}
             >
-              进入爆款复刻
+              进入高保真复刻
               <ArrowRight size={13} strokeWidth={2.4} className="ml-1.5" />
             </button>
           </div>

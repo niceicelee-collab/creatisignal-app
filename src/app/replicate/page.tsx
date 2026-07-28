@@ -1,11 +1,11 @@
 import { Topbar } from "@/components/layout/topbar"
-import { ReplicateHub } from "@/components/replicate/replicate-hub"
+import { ReplicateBetaHub } from "@/components/replicate/beta/replicate-beta-hub"
 
 export default function ReplicateHubPage() {
   return (
     <>
-      <Topbar title="爆款复刻" />
-      <ReplicateHub />
+      <Topbar title="高保真复刻" />
+      <ReplicateBetaHub />
     </>
   )
 }

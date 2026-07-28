@@ -1,17 +1,24 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Video, Image, UserRound, ChevronDown, SlidersHorizontal, Sparkles, Star, X, Play } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Video, Image, UserRound, ChevronDown, SlidersHorizontal, Sparkles, Star, X, Play, Link2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SendButton } from "../send-button"
 import { ImageSelectModal, type ImageItem } from "@/components/modals/image-select-modal"
 import { VideoSelectModal, type VideoItem } from "@/components/modals/video-select-modal"
 import { DigitalHumanModal, type DHItem } from "@/components/modals/digital-human-modal"
+import { ReplicateSourceModal, type ReplicateSourceChoice } from "@/components/assistant/replicate-source-modal"
 
 // ─── Types & Data ────────────────────────────────────────────────────────────
 
 type GenType = "video" | "image" | "remix" | "reverse"
-type ActivePopup = "model" | "hook" | "settings" | null
+type ActivePopup = "task" | "model" | "hook" | "settings" | null
+
+const TASK_TYPES: { id: "video" | "remix"; label: string; description: string; icon: typeof Video }[] = [
+  { id: "video", label: "视频生成", description: "从提示词生成新视频", icon: Video },
+  { id: "remix", label: "高保真复刻", description: "先选参考素材，再拆解与替换", icon: Link2 },
+]
 
 const videoModels = ["Seedance 2", "Seedance 1 Pro", "Veo 3", "Kling 2.1"]
 const imageModels = ["Nano Banana Pro", "GPT Image 1", "Seedream 4.0"]
@@ -486,7 +493,8 @@ interface GenerateModeProps {
 }
 
 export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateModeProps = {}) {
-  const [genType] = useState<GenType>("video")
+  const router = useRouter()
+  const [genType, setGenType] = useState<GenType>("video")
   const [text, setText] = useState("")
   const [activePopup, setActivePopup] = useState<ActivePopup>(null)
   const [selectedHook, setSelectedHook] = useState<HookPattern | null>(null)
@@ -507,11 +515,6 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
     return () => window.clearTimeout(timer)
   }, [initialPrompt])
 
-  function handleSend() {
-    if (!text.trim()) return
-    onSubmit?.()
-  }
-
   // Video/remix settings — 默认拉满到新出的「720P · 9:16 · 30s」高质量组合
   const [videoResolution, setVideoResolution] = useState("720P")
   const [videoRatio, setVideoRatio] = useState("9:16")
@@ -529,11 +532,56 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
   const [selectedImages, setSelectedImages] = useState<ImageItem[]>([])
   const [selectedVideos, setSelectedVideos] = useState<VideoItem[]>([])
   const [digitalHuman, setDigitalHuman] = useState<DHItem | null>(null)
+  const [replicateReference, setReplicateReference] = useState<ReplicateSourceChoice | null>(null)
+  const [uploadedReference, setUploadedReference] = useState<{ name: string; previewUrl: string } | null>(null)
 
   // Modal open states
   const [imageModalOpen, setImageModalOpen] = useState(false)
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [dhModalOpen, setDhModalOpen] = useState(false)
+  const [replicateSourceOpen, setReplicateSourceOpen] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (uploadedReference?.previewUrl) URL.revokeObjectURL(uploadedReference.previewUrl)
+    }
+  }, [uploadedReference])
+
+  function openReplicateWorkspace(choice?: ReplicateSourceChoice) {
+    const params = new URLSearchParams()
+    if (choice) {
+      params.set("asset", choice.assetId)
+      params.set("title", `${choice.title.replace(/^[^：]+：/, "")} · 新版本`)
+    } else if (uploadedReference) {
+      params.set("source", "upload")
+      params.set("upload", uploadedReference.name)
+      params.set("title", `${uploadedReference.name.replace(/\.[^.]+$/, "")} · 新版本`)
+    }
+    router.push(`/replicate/beta-draft?${params.toString()}`)
+  }
+
+  function handleReplicateSource(choice: ReplicateSourceChoice, startImmediately: boolean) {
+    setReplicateReference(choice)
+    setUploadedReference(null)
+    if (startImmediately) openReplicateWorkspace(choice)
+  }
+
+  function handleReferenceUpload(file?: File) {
+    if (!file) return
+    setReplicateReference(null)
+    setUploadedReference({ name: file.name, previewUrl: URL.createObjectURL(file) })
+  }
+
+  function handleSend() {
+    if (genType === "remix") {
+      if (replicateReference) openReplicateWorkspace(replicateReference)
+      else if (uploadedReference) openReplicateWorkspace()
+      else setReplicateSourceOpen(true)
+      return
+    }
+    if (!text.trim()) return
+    onSubmit?.()
+  }
 
   const configRef = useRef<HTMLDivElement>(null)
 
@@ -551,6 +599,8 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
   const models = genType === "image" ? imageModels : genType === "reverse" ? reverseModels : videoModels
   const maxLen = genType === "video" ? 8000 : 2000
   const settingsLabel = genType === "image" ? `${imageResolution} · ${imageRatio}` : `${videoResolution} · ${videoRatio} · ${videoDuration}s`
+  const activeTask = TASK_TYPES.find((task) => task.id === genType) ?? TASK_TYPES[0]
+  const ActiveTaskIcon = activeTask.icon
   const signalPointCost = getSignalPointCost({
     genType,
     model,
@@ -562,11 +612,13 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
   const placeholders: Record<GenType, string> = {
     video: "描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频",
     image: "描述你想生成的图片内容、构图、风格与商品信息",
-    remix: "粘贴爆款素材链接，或描述想复刻的画面结构、卖点与节奏",
+    remix: "选择或上传想要复刻爆款素材，开始复刻",
     reverse: "贴入视频链接，或上传图片 / 视频，反推出可复用提示词",
   }
 
   const hasMedia = selectedImages.length > 0 || selectedVideos.length > 0
+  const hasReplicateSource = Boolean(replicateReference || uploadedReference)
+  const sendDisabled = genType === "remix" ? false : !text.trim()
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -603,8 +655,24 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
             </>
           )}
           {genType === "image" && <UploadSlot label="图片" icon={Image} onClick={() => setImageModalOpen(true)} />}
-          {(genType === "remix" || genType === "reverse") && (
+          {genType === "reverse" && (
             <UploadSlot label="视频" icon={Video} onClick={() => setVideoModalOpen(true)} />
+          )}
+          {genType === "remix" && (
+            <button
+              type="button"
+              onClick={() => setReplicateSourceOpen(true)}
+              aria-label="选择或上传爆款素材"
+              title="选择或上传爆款素材"
+              className={cn(
+                "flex h-[40px] w-[40px] items-center justify-center rounded-[10px] border transition-colors",
+                hasReplicateSource
+                  ? "border-[#a8cf25] bg-[#efffc3] text-[#34430b]"
+                  : "border-dashed border-[var(--line-strong)] bg-white/60 text-[var(--muted)] hover:border-[#9ebf2b] hover:text-[#4d6210]",
+              )}
+            >
+              <Video size={16} strokeWidth={2.2} />
+            </button>
           )}
         </div>
 
@@ -626,7 +694,39 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
               ))}
             </div>
           )}
-          {selectedHook && (
+          {genType === "remix" && (replicateReference || uploadedReference) && (
+            <div className="flex w-full items-center gap-3 rounded-xl border border-[#dce7b5] bg-[#f8ffe8] p-2.5">
+              <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-lg bg-[#e4e7ea]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={replicateReference?.cover ?? uploadedReference?.previewUrl}
+                  alt={replicateReference?.title ?? uploadedReference?.name ?? "参考素材"}
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <Play size={11} fill="white" className="text-white" />
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold text-[#82923e]">本次复刻参考</p>
+                <p className="mt-0.5 truncate text-[12px] font-extrabold text-[#303713]">
+                  {replicateReference?.title ?? uploadedReference?.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setReplicateReference(null)
+                  setUploadedReference(null)
+                }}
+                aria-label="移除参考素材"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#7e8757] hover:bg-[#e8f3c3] hover:text-[#303713]"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
+          {genType === "video" && selectedHook && (
             <p className="w-full text-[14px] font-medium leading-6 text-[#667085]" aria-label="Hook 描述">
               前3s Hook：{selectedHook.desc}
             </p>
@@ -635,10 +735,10 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
             ref={textareaRef}
             className={cn(
               "w-full outline-none resize-none text-[#24272f] text-[15px] leading-[1.5] bg-transparent placeholder:text-[var(--muted-2)]",
-              selectedHook ? "min-h-[48px] border-0 px-0 py-0" : "min-h-[52px] border-0"
+              genType === "video" && selectedHook ? "min-h-[48px] border-0 px-0 py-0" : "min-h-[52px] border-0"
             )}
-            aria-label={selectedHook ? "3秒后画面描述" : undefined}
-            placeholder={selectedHook ? "描述3s后的画面内容和动态过程，适用@指定模特、参考图或参考视频" : placeholders[genType]}
+            aria-label={genType === "remix" ? "高保真复刻补充要求" : selectedHook ? "3秒后画面描述" : undefined}
+            placeholder={genType === "video" && selectedHook ? "描述3s后的画面内容和动态过程，适用@指定模特、参考图或参考视频" : placeholders[genType]}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={maxLen}
@@ -650,79 +750,126 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
       {/* Config row */}
       <div ref={configRef} className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Model */}
-          <div className="relative">
-            <button type="button" onClick={() => toggle("model")} className={pickerBtn}>
-              <span className="w-4 h-4 rounded bg-[var(--soft)] text-[9px] font-black flex items-center justify-center shrink-0">{model.slice(0, 2)}</span>
-              <span className="font-medium">{model}</span>
-              <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "model" && "rotate-180")} />
-            </button>
-            {activePopup === "model" && (
-              <ModelPopup options={models} selected={model} onSelect={(v) => { setModel(v); setActivePopup(null) }} />
-            )}
-          </div>
-
-          {/* Hook */}
+          {/* Task type */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => toggle("hook")}
-              className={cn(pickerBtn, "w-[112px] overflow-hidden", selectedHook && "bg-[#eff8ff] text-[#0a84d8]")}
+              onClick={() => toggle("task")}
+              aria-label="选择创意生成任务"
+              className={cn(pickerBtn, genType === "remix" && "border-[#d9e8a8] bg-[#f5ffdc] text-[#33400d]")}
             >
-              <TargetArrowIcon size={14} strokeWidth={2.1} />
-              <span className="min-w-0 flex-1 truncate text-left">{selectedHook?.title ?? "Hook"}</span>
-              <ChevronDown size={12} className={cn("-ml-0.5 shrink-0 transition-transform", selectedHook ? "text-[#0a84d8]" : "text-[var(--muted)]", activePopup === "hook" && "rotate-180")} />
+              <ActiveTaskIcon size={14} strokeWidth={2.2} />
+              <span className="font-bold">{activeTask.label}</span>
+              <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "task" && "rotate-180")} />
             </button>
-            {activePopup === "hook" && (
-              <HookPopup
-                onApply={(hook) => {
-                  setSelectedHook(hook)
-                  setActivePopup(null)
-                }}
-                onClose={() => setActivePopup(null)}
-                initialHookId={selectedHook?.id}
-              />
+            {activePopup === "task" && (
+              <PopupCard className="w-[218px] p-2">
+                {TASK_TYPES.map(({ id, label, description, icon: Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setGenType(id)
+                      setActivePopup(null)
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors",
+                      genType === id ? "bg-[#f1f2f3]" : "hover:bg-[#f7f7f8]",
+                    )}
+                  >
+                    <span className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                      id === "remix" ? "bg-[#efffc3] text-[#40530d]" : "bg-white text-[#555a63] shadow-sm",
+                    )}>
+                      <Icon size={15} strokeWidth={2.2} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[12px] font-extrabold text-[#292b31]">{label}</span>
+                      <span className="mt-0.5 block text-[10px] leading-4 text-[#92969e]">{description}</span>
+                    </span>
+                  </button>
+                ))}
+              </PopupCard>
             )}
           </div>
 
-          {/* Settings */}
-          {genType !== "reverse" && (
-            <div className="relative">
-              <button type="button" onClick={() => toggle("settings")} className={pickerBtn}>
-                <SlidersHorizontal size={15} strokeWidth={2} />
-                <span>{settingsLabel}</span>
-                {genType !== "image" && videoResolution === "720P" && videoRatio === "9:16" && videoDuration === 30 && (
-                  <span
-                    className="ml-1 inline-flex items-center h-[18px] px-1.5 rounded-md bg-[var(--lime)] text-[#1a2010] text-[9.5px] font-extrabold tracking-wide leading-none"
-                    title="新推出的高质量默认配置"
-                  >
-                    NEW
-                  </span>
+          {genType !== "remix" && (
+            <>
+              {/* Model */}
+              <div className="relative">
+                <button type="button" onClick={() => toggle("model")} className={pickerBtn}>
+                  <span className="w-4 h-4 rounded bg-[var(--soft)] text-[9px] font-black flex items-center justify-center shrink-0">{model.slice(0, 2)}</span>
+                  <span className="font-medium">{model}</span>
+                  <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "model" && "rotate-180")} />
+                </button>
+                {activePopup === "model" && (
+                  <ModelPopup options={models} selected={model} onSelect={(v) => { setModel(v); setActivePopup(null) }} />
                 )}
-                <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "settings" && "rotate-180")} />
-              </button>
-              {activePopup === "settings" && (
-                genType === "image" ? (
-                  <ImageSettingsPopup resolution={imageResolution} setResolution={setImageResolution} ratio={imageRatio} setRatio={setImageRatio} />
-                ) : (
-                  <VideoSettingsPopup resolution={videoResolution} setResolution={setVideoResolution} ratio={videoRatio} setRatio={setVideoRatio} duration={videoDuration} setDuration={setVideoDuration} />
-                )
+              </div>
+
+              {/* Hook */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => toggle("hook")}
+                  className={cn(pickerBtn, "w-[112px] overflow-hidden", selectedHook && "bg-[#eff8ff] text-[#0a84d8]")}
+                >
+                  <TargetArrowIcon size={14} strokeWidth={2.1} />
+                  <span className="min-w-0 flex-1 truncate text-left">{selectedHook?.title ?? "Hook"}</span>
+                  <ChevronDown size={12} className={cn("-ml-0.5 shrink-0 transition-transform", selectedHook ? "text-[#0a84d8]" : "text-[var(--muted)]", activePopup === "hook" && "rotate-180")} />
+                </button>
+                {activePopup === "hook" && (
+                  <HookPopup
+                    onApply={(hook) => {
+                      setSelectedHook(hook)
+                      setActivePopup(null)
+                    }}
+                    onClose={() => setActivePopup(null)}
+                    initialHookId={selectedHook?.id}
+                  />
+                )}
+              </div>
+
+              {/* Settings */}
+              {genType !== "reverse" && (
+                <div className="relative">
+                  <button type="button" onClick={() => toggle("settings")} className={pickerBtn}>
+                    <SlidersHorizontal size={15} strokeWidth={2} />
+                    <span>{settingsLabel}</span>
+                    {genType !== "image" && videoResolution === "720P" && videoRatio === "9:16" && videoDuration === 30 && (
+                      <span
+                        className="ml-1 inline-flex items-center h-[18px] px-1.5 rounded-md bg-[var(--lime)] text-[#1a2010] text-[9.5px] font-extrabold tracking-wide leading-none"
+                        title="新推出的高质量默认配置"
+                      >
+                        NEW
+                      </span>
+                    )}
+                    <ChevronDown size={12} className={cn("text-[var(--muted)] -ml-0.5 transition-transform", activePopup === "settings" && "rotate-180")} />
+                  </button>
+                  {activePopup === "settings" && (
+                    genType === "image" ? (
+                      <ImageSettingsPopup resolution={imageResolution} setResolution={setImageResolution} ratio={imageRatio} setRatio={setImageRatio} />
+                    ) : (
+                      <VideoSettingsPopup resolution={videoResolution} setResolution={setVideoResolution} ratio={videoRatio} setRatio={setVideoRatio} duration={videoDuration} setDuration={setVideoDuration} />
+                    )
+                  )}
+                </div>
               )}
-            </div>
+            </>
           )}
-
-
         </div>
 
         <div className="flex items-center gap-2">
-          <span
-            className="inline-flex items-center gap-1 text-[14px] font-semibold text-[#6f7480] tabular-nums whitespace-nowrap"
-            title={`预计消耗 ${signalPointCost.toLocaleString("zh-CN")} 积分`}
-          >
-            <Sparkles size={14} strokeWidth={2.4} />
-            {signalPointCost.toLocaleString("zh-CN")}
-          </span>
-          <SendButton disabled={!text.trim()} loading={submitting} onClick={handleSend} />
+          {genType !== "remix" && (
+            <span
+              className="inline-flex items-center gap-1 text-[14px] font-semibold text-[#6f7480] tabular-nums whitespace-nowrap"
+              title={`预计消耗 ${signalPointCost.toLocaleString("zh-CN")} 积分`}
+            >
+              <Sparkles size={14} strokeWidth={2.4} />
+              {signalPointCost.toLocaleString("zh-CN")}
+            </span>
+          )}
+          <SendButton disabled={sendDisabled} loading={submitting} onClick={handleSend} />
         </div>
       </div>
 
@@ -747,6 +894,13 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
         open={dhModalOpen}
         onOpenChange={setDhModalOpen}
         onConfirm={(item) => setDigitalHuman(item)}
+      />
+      <ReplicateSourceModal
+        open={replicateSourceOpen}
+        selectedId={replicateReference?.id}
+        onOpenChange={setReplicateSourceOpen}
+        onSelect={handleReplicateSource}
+        onUpload={handleReferenceUpload}
       />
     </div>
   )

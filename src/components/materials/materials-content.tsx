@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Search, ChevronDown, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MultimodalSearch } from "./multimodal-search"
@@ -147,17 +146,20 @@ export function MaterialsContent() {
 
       <div className="flex items-center justify-between mb-[14px]">
         <span></span>
-        <button className="h-[34px] border-0 rounded-full bg-[var(--lime)] text-[#20251a] px-[18px] text-[13px] font-extrabold cursor-pointer">
-          一键克隆创意 ★
-        </button>
+        <Link
+          href="/replicate/beta-market-001?asset=market-001&source=market&title=%E5%B8%82%E5%9C%BA%E7%88%86%E6%AC%BE%E5%A4%8D%E5%88%BB"
+          className="flex h-[34px] items-center rounded-full border-0 bg-[var(--lime)] px-[18px] text-[13px] font-extrabold text-[#20251a]"
+        >
+          一键复刻 ★
+        </Link>
       </div>
 
       {/* Grid */}
       <div className="grid grid-cols-5 gap-[18px]">
         {materials.map((m) => {
-          // 把 mock id "1"-"10" 映射到 MATERIALS 里真实 fingerprint，进入复刻工作台
-          const fp = `fp_${m.id.padStart(3, "0")}`
-          const replicateHref = `/replicate/${fp}?source=discover`
+          const betaAssetIds = ["market-001", "market-beta-product", "market-beta-product-coffee", "market-beta-completed-shoes"]
+          const assetId = betaAssetIds[(Number(m.id) - 1) % betaAssetIds.length]
+          const replicateHref = `/replicate/beta-market-${m.id}?asset=${assetId}&source=market&title=${encodeURIComponent(`${m.tactic} · 高保真复刻`)}`
           return (
             <article
               key={m.id}
@@ -183,11 +185,11 @@ export function MaterialsContent() {
                 <Link
                   href={replicateHref}
                   className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="复刻这条市场爆款"
+                  aria-label="一键复刻这条市场爆款"
                 >
                   <span className="h-9 px-4 rounded-full bg-white text-[#18181b] text-[12.5px] font-extrabold flex items-center gap-1.5 shadow-lg">
                     <Wand2 size={13} strokeWidth={2.4} />
-                    复刻这条
+                    一键复刻
                   </span>
                 </Link>
               </div>
@@ -196,6 +198,13 @@ export function MaterialsContent() {
                 <span>□ {m.comments}</span>
                 <span>⇧ {m.shares}</span>
               </div>
+              <Link
+                href={replicateHref}
+                className="mx-3 mb-3 flex h-8 items-center justify-center gap-1.5 rounded-md bg-[#17181b] text-[12px] font-extrabold text-white transition-colors hover:bg-black"
+              >
+                <Wand2 size={13} strokeWidth={2.4} />
+                一键复刻
+              </Link>
             </article>
           )
         })}

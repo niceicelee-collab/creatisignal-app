@@ -916,7 +916,7 @@ export const REPLICA_PROJECTS: ReplicaProject[] = (() => {
     7: { fromId: "rep_003", axis: "scene" },
   }
   const titleByCat: Record<ReplicaCategory, string> = {
-    market: "市场爆款复刻",
+    market: "市场高保真复刻",
     competitor: "竞对爆款拆解",
     own: "自有爆款放大",
     upload: "自主上传迭代",

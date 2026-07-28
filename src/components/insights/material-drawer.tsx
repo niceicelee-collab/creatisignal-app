@@ -271,7 +271,7 @@ function ReplicaFooter({
             )}
           >
             {material.lifecyclePhase === "peak" ? <Zap size={14} strokeWidth={2.4} /> : <Wand2 size={14} strokeWidth={2.2} />}
-            进入爆款复刻
+            进入高保真复刻
             <ArrowRight size={13} strokeWidth={2.4} className="opacity-80" />
           </Link>
         )}
@@ -618,7 +618,7 @@ function MatchTab({
         <div className="rounded-xl border border-[#dff9e7] bg-[#f0fdf4] p-3 text-[12px] text-[var(--text)] leading-relaxed">
           <p className="font-extrabold text-[#15803d] mb-1.5">复刻匹配建议</p>
           <p>
-            建议进入爆款复刻后围绕三条方向生成：强聚光 Hook、强细节 Proof，以及 Hook + Proof 组合。
+            建议进入高保真复刻后围绕三条方向生成：强聚光 Hook、强细节 Proof，以及 Hook + Proof 组合。
             优先保留“暗场聚光 + 闪钻大拖尾 + 缓慢推进”的视觉骨架，不要把画面改成普通货架展示，否则会丢失高定仪式感。
           </p>
         </div>
@@ -626,7 +626,7 @@ function MatchTab({
 
       <div className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--soft-2)] p-3 text-[11.5px] text-[var(--muted)] leading-relaxed flex items-start gap-1.5">
         <ShieldCheck size={12} className="mt-0.5 shrink-0" />
-        <span>下一步可进入<span className="font-bold text-[var(--text)]">爆款复刻</span>，选择只动一个变量轴生成 2–3 个变体；卖点点击可直接跳到 Brief。</span>
+        <span>下一步可进入<span className="font-bold text-[var(--text)]">高保真复刻</span>，选择只动一个变量轴生成 2–3 个变体；卖点点击可直接跳到 Brief。</span>
       </div>
     </div>
   )

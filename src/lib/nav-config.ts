@@ -62,6 +62,7 @@ export const navSections: NavSection[] = [
     subMenu: [
       { label: "灵感发现", href: "/discover/inspiration" },
       { label: "品牌追踪", href: "/discover/brands" },
+      { label: "AIGC爆款", href: "/discover/aigc-hits" },
     ],
   },
   {
@@ -70,7 +71,7 @@ export const navSections: NavSection[] = [
     label: "创作",
     defaultHref: "/replicate",
     subMenu: [
-      { label: "爆款复刻", href: "/replicate" },
+      { label: "高保真复刻", href: "/replicate" },
       { label: "创意画布", href: "/create/canvas" },
     ],
   },
