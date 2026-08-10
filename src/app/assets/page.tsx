@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function AssetsIndexPage() {
-  redirect("/assets/generated")
+  redirect("/assets/reports")
 }

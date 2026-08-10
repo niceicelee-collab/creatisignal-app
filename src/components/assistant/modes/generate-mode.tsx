@@ -32,7 +32,7 @@ const IMAGE_RATIOS = ["Auto", "1:1", "3:4", "4:3", "9:16", "16:9", "21:9"]
 const HOOK_CATEGORIES = ["全部", "推荐", "高打断", "建立信任", "教程演示", "UGC自然", "产品卖点"] as const
 
 type HookCategory = (typeof HOOK_CATEGORIES)[number]
-type HookPattern = {
+export type HookPattern = {
   id: string
   category: Exclude<HookCategory, "全部">
   title: string
@@ -42,7 +42,7 @@ type HookPattern = {
   tag: string
 }
 
-const HOOK_PATTERNS: HookPattern[] = [
+export const HOOK_PATTERNS: HookPattern[] = [
   {
     id: "result-first",
     category: "推荐",
@@ -236,7 +236,7 @@ function ModelPopup({ options, selected, onSelect }: { options: string[]; select
   )
 }
 
-function HookPopup({ onApply, onClose, initialHookId }: { onApply: (hook: HookPattern) => void; onClose: () => void; initialHookId?: string }) {
+export function HookPopup({ onApply, onClose, initialHookId }: { onApply: (hook: HookPattern) => void; onClose: () => void; initialHookId?: string }) {
   const [activeCategory, setActiveCategory] = useState<HookCategory>("推荐")
   const [selectedHookId, setSelectedHookId] = useState(initialHookId ?? HOOK_PATTERNS[0].id)
 

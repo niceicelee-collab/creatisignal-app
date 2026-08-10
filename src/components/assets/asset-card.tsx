@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Check, Download, ImageIcon, Play, Trash2, User, Video } from "lucide-react"
+import { Box, Check, Download, ImageIcon, Play, Star, Trash2, User, Video } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ASSET_KIND_META, type AssetItem } from "@/lib/assets/mock"
 
@@ -9,9 +9,12 @@ interface Props {
   selecting: boolean
   selected: boolean
   onToggleSelect: () => void
+  favorite?: boolean
+  onToggleFavorite?: () => void
+  favoritable?: boolean
 }
 
-export function AssetCard({ item, selecting, selected, onToggleSelect }: Props) {
+export function AssetCard({ item, selecting, selected, onToggleSelect, favorite = false, onToggleFavorite, favoritable = false }: Props) {
   const kindMeta = ASSET_KIND_META[item.kind]
   const TypeIcon =
     item.kind === "video" ? Video :
@@ -70,10 +73,21 @@ export function AssetCard({ item, selecting, selected, onToggleSelect }: Props) 
           </button>
         )}
 
-        {/* 右下角小 box icon（如示例图） */}
-        <span className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-black/55 backdrop-blur text-white flex items-center justify-center pointer-events-none">
-          <Box size={11} strokeWidth={2.4} />
-        </span>
+        {favoritable ? (
+          <button
+            type="button"
+            aria-label={favorite ? "取消收藏" : "收藏"}
+            title={favorite ? "取消收藏" : "收藏"}
+            onClick={(event) => { event.stopPropagation(); onToggleFavorite?.() }}
+            className={cn("absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition", favorite ? "bg-[#c9ff29] text-[#273408]" : "bg-black/55 text-white hover:bg-black/75")}
+          >
+            <Star size={14} strokeWidth={2.2} fill={favorite ? "currentColor" : "none"} />
+          </button>
+        ) : (
+          <span className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-black/55 backdrop-blur text-white flex items-center justify-center pointer-events-none">
+            <Box size={11} strokeWidth={2.4} />
+          </span>
+        )}
       </div>
 
       {/* 底部信息 */}

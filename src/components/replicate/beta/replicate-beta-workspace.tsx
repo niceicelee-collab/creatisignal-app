@@ -34,6 +34,8 @@ import {
   Zap,
 } from "lucide-react"
 import { DigitalHumanModal, type DHItem } from "@/components/modals/digital-human-modal"
+import { ProductPickerDialog } from "@/components/products/product-picker-dialog"
+import type { Product } from "@/components/products/product-data"
 import {
   BETA_MATERIALS,
   BETA_PROJECTS,
@@ -730,6 +732,28 @@ function StepNavigation({
   )
 }
 
+type OwnedSortKey = "ctr" | "spend" | "impressions" | "clicks" | "conversions"
+type SortDirection = "asc" | "desc"
+
+const OWNED_PAGE_SIZE = 4
+const OWNED_SORT_OPTIONS: Array<{ key: OwnedSortKey; label: string }> = [
+  { key: "ctr", label: "点击率" },
+  { key: "spend", label: "广告花费" },
+  { key: "impressions", label: "展示次数" },
+  { key: "clicks", label: "点击次数" },
+  { key: "conversions", label: "转化次数" },
+]
+const OWNED_MATERIAL_METRICS: Record<string, Record<OwnedSortKey, number>> = {
+  "aigc-003": { ctr: 0.052, spend: 18240, impressions: 1180000, clicks: 61360, conversions: 2640 },
+  "aigc-004": { ctr: 0.047, spend: 15620, impressions: 980000, clicks: 46060, conversions: 2130 },
+  "market-001": { ctr: 0.061, spend: 24380, impressions: 1420000, clicks: 86620, conversions: 3710 },
+  "brand-001": { ctr: 0.039, spend: 12860, impressions: 760000, clicks: 29640, conversions: 1680 },
+  "owned-001": { ctr: 0.044, spend: 11380, impressions: 690000, clicks: 30360, conversions: 1540 },
+  "owned-002": { ctr: 0.057, spend: 20760, impressions: 1260000, clicks: 71820, conversions: 3080 },
+  "owned-003": { ctr: 0.036, spend: 9840, impressions: 610000, clicks: 21960, conversions: 1260 },
+  "owned-004": { ctr: 0.041, spend: 8460, impressions: 540000, clicks: 22140, conversions: 1180 },
+}
+
 function SourceStep({
   sourceTab,
   onSourceTab,
@@ -759,6 +783,9 @@ function SourceStep({
   const [brandStatus, setBrandStatus] = useState("全部状态")
   const [brandSortMetric, setBrandSortMetric] = useState("点赞")
   const [brandSortDirection, setBrandSortDirection] = useState("倒序")
+  const [ownedSortKey, setOwnedSortKey] = useState<OwnedSortKey>("ctr")
+  const [ownedSortDirection, setOwnedSortDirection] = useState<SortDirection>("desc")
+  const [ownedPage, setOwnedPage] = useState(1)
 
   const visibleMaterials = useMemo(() => filterSourceMaterials({
     sourceTab,
@@ -792,6 +819,22 @@ function SourceStep({
     sourceTab,
   ])
 
+  const sortedMaterials = useMemo(() => {
+    if (sourceTab !== "自有素材") return visibleMaterials
+    return [...visibleMaterials].sort((left, right) => {
+      const leftValue = OWNED_MATERIAL_METRICS[left.id]?.[ownedSortKey] ?? 0
+      const rightValue = OWNED_MATERIAL_METRICS[right.id]?.[ownedSortKey] ?? 0
+      const difference = leftValue - rightValue
+      return ownedSortDirection === "asc" ? difference : -difference
+    })
+  }, [ownedSortDirection, ownedSortKey, sourceTab, visibleMaterials])
+
+  const ownedTotalPages = Math.max(1, Math.ceil(sortedMaterials.length / OWNED_PAGE_SIZE))
+  const currentOwnedPage = Math.min(ownedPage, ownedTotalPages)
+  const displayedMaterials = sourceTab === "自有素材"
+    ? sortedMaterials.slice((currentOwnedPage - 1) * OWNED_PAGE_SIZE, currentOwnedPage * OWNED_PAGE_SIZE)
+    : sortedMaterials
+
   function refreshAigcMaterials() {
     setAigcRefreshing(true)
     window.setTimeout(() => setAigcRefreshing(false), 600)
@@ -805,7 +848,10 @@ function SourceStep({
           <button
             key={tab}
             type="button"
-            onClick={() => onSourceTab(tab)}
+            onClick={() => {
+              setOwnedPage(1)
+              onSourceTab(tab)
+            }}
             className={cn(
               "relative h-10 shrink-0 px-3 text-[12px] font-bold",
               sourceTab === tab ? "text-[#17181c]" : "text-[#898d95]",
@@ -898,6 +944,32 @@ function SourceStep({
         </div>
       )}
 
+      {sourceTab === "自有素材" && (
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2 rounded-lg border border-[var(--line)] bg-white p-3">
+          <span className="text-[10.5px] font-bold text-[#858991]">排序</span>
+          <FilterSelect
+            value={OWNED_SORT_OPTIONS.find((option) => option.key === ownedSortKey)?.label ?? "点击率"}
+            onChange={(value) => {
+              const option = OWNED_SORT_OPTIONS.find((item) => item.label === value)
+              if (!option) return
+              setOwnedPage(1)
+              setOwnedSortKey(option.key)
+            }}
+            options={OWNED_SORT_OPTIONS.map((option) => option.label)}
+            label="排序指标"
+          />
+          <FilterSelect
+            value={ownedSortDirection === "desc" ? "倒序" : "正序"}
+            onChange={(value) => {
+              setOwnedPage(1)
+              setOwnedSortDirection(value === "正序" ? "asc" : "desc")
+            }}
+            options={BRAND_SORT_DIRECTION_OPTIONS}
+            label="排序方向"
+          />
+        </div>
+      )}
+
       {sourceTab === "本地上传" ? (
         <label className="mt-5 flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#cfd2d7] bg-white text-center hover:border-[#9ca3af]">
           <Upload size={25} className="text-[#8d9199]" />
@@ -911,8 +983,9 @@ function SourceStep({
           />
         </label>
       ) : (
-        <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {visibleMaterials.map((material) => {
+        <>
+          <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {displayedMaterials.map((material) => {
             const selected = selectedMaterialId === material.id
             return (
               <button
@@ -944,7 +1017,51 @@ function SourceStep({
               <p className="mt-1 text-[10.5px] text-[#999ca3]">请调整筛选条件后重试</p>
             </div>
           )}
-        </div>
+          </div>
+          {sourceTab === "自有素材" && (
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
+              <p className="text-[10.5px] text-[#9699a1]">第 {currentOwnedPage} / {ownedTotalPages} 页 · 每页 {OWNED_PAGE_SIZE} 条</p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setOwnedPage((page) => Math.max(1, page - 1))}
+                  disabled={currentOwnedPage === 1}
+                  aria-label="上一页"
+                  title="上一页"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--line)] text-[#676b73] hover:bg-[#f5f6f7] disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  <ArrowLeft size={13} />
+                </button>
+                {Array.from({ length: ownedTotalPages }, (_, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setOwnedPage(page)}
+                    aria-current={currentOwnedPage === page ? "page" : undefined}
+                    className={cn(
+                      "h-8 min-w-8 rounded-md border px-2 text-[10.5px] font-bold",
+                      currentOwnedPage === page
+                        ? "border-[#8fb226] bg-[#efffc4] text-[#405409]"
+                        : "border-[var(--line)] bg-white text-[#555962] hover:bg-[#f5f6f7]",
+                    )}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setOwnedPage((page) => Math.min(ownedTotalPages, page + 1))}
+                  disabled={currentOwnedPage === ownedTotalPages}
+                  aria-label="下一页"
+                  title="下一页"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--line)] text-[#676b73] hover:bg-[#f5f6f7] disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </section>
   )
@@ -976,6 +1093,16 @@ function FilterSelect({
   )
 }
 
+const NARRATIVE_STAGE_TONES = [
+  { backgroundColor: "#fff1f2", borderColor: "#ffb4b8", color: "#d92d20" },
+  { backgroundColor: "#eef5ff", borderColor: "#b6d4fe", color: "#2869c8" },
+  { backgroundColor: "#f4f0ff", borderColor: "#d7c8ff", color: "#6f48d6" },
+  { backgroundColor: "#fff8e6", borderColor: "#ffd77a", color: "#a15c00" },
+  { backgroundColor: "#ecfdf7", borderColor: "#a7efd3", color: "#087a57" },
+  { backgroundColor: "#edfadf", borderColor: "#b7e979", color: "#4b7c12" },
+]
+
+const getNarrativeStageTone = (index: number) => NARRATIVE_STAGE_TONES[index % NARRATIVE_STAGE_TONES.length]
 function BreakdownStep({ material, loading }: { material: BetaMaterial; loading: boolean }) {
   const [activeSection, setActiveSection] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -1008,7 +1135,7 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
   if (loading) return <BreakdownSkeleton />
 
   return (
-    <section>
+    <section className="text-[#152238]">
       <StepHeader title="查看爆款拆解结果" description="理解爆款视频为什么有效：包括爆款创意策略、视频叙事结构、核心商品和人物有什么特点" />
       <div className="mt-5 grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <aside className="space-y-4">
@@ -1026,7 +1153,7 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
               className="aspect-[9/16] max-h-[560px] w-full object-contain"
             />
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-md border border-[var(--line)] bg-white sm:grid-cols-6">
+          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-[#dfe4ec] bg-white shadow-[0_8px_24px_rgba(32,52,86,0.06)] sm:grid-cols-6">
             {NARRATIVE_SECTIONS.map((section) => (
               <button
                 key={section.sect_id}
@@ -1034,7 +1161,7 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                 onClick={() => selectSection(section)}
                 className={cn(
                   "h-12 whitespace-nowrap border-r border-[var(--line)] px-1 text-[10px] font-extrabold last:border-r-0",
-                  activeSection === section.sect_id ? "bg-[#17181c] text-white" : "text-[#747880]",
+                  activeSection === section.sect_id ? "bg-[#9bea32] text-[#17210a] shadow-[inset_0_-3px_0_#78c91e]" : "bg-[#f8fafc] text-[#6e788b] hover:bg-[#f0f8dd]",
                 )}
               >
                 {getNarrativeRoleLabel(section.role).split(" / ")[0]}<span className="mt-0.5 block text-[9px] opacity-70">#{section.sect_id + 1}</span>
@@ -1044,8 +1171,8 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
         </aside>
 
         <div className="space-y-5">
-          <section className="border-b border-[var(--line)] pb-5">
-            <h3 className="text-[14px] font-extrabold text-[#292c32]">策略摘要</h3>
+          <section className="rounded-2xl border border-[#dfe4ec] bg-white p-5 shadow-[0_10px_30px_rgba(32,52,86,0.06)]">
+            <h3 className="flex items-center gap-2 text-[14px] font-extrabold text-[#16233a]"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#efffc4] text-[#64821a]"><WandSparkles size={15} /></span>策略摘要</h3>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               <InfoField label="创意策略" value={CREATIVE_BRIEF.overall_strategy} />
               <InfoField label="目标受众" value={CREATIVE_BRIEF.target_audience} />
@@ -1055,52 +1182,15 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                 <InfoField label="使用场景" value={CREATIVE_BRIEF.use_scenarios.join("、")} />
               </div>
               <div>
-                <InfoField label="情绪曲线" value={CREATIVE_BRIEF.emotional_journey.join(" → ")} />
+                <EmotionJourney items={CREATIVE_BRIEF.emotional_journey} />
               </div>
             </div>
           </section>
 
-          <section className="border-b border-[var(--line)] pb-5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[14px] font-extrabold text-[#292c32]">叙事结构概览</h3>
-              <span className="text-[10.5px] text-[#9699a1]">
-                {NARRATIVE_SECTIONS.length} 个阶段 · {NARRATIVE_SECTIONS.reduce((total, section) => total + section.scenes.length, 0)} 个分镜
-              </span>
-            </div>
-            <div className="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] table-fixed border-collapse text-left whitespace-nowrap">
-                  <thead className="bg-[#f6f7f8]">
-                    <tr>
-                      <th scope="col" className="w-[30%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">阶段</th>
-                      <th scope="col" className="w-[18%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">时间</th>
-                      <th scope="col" className="w-[40%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">阶段摘要</th>
-                      <th scope="col" className="w-[12%] px-3 py-2 text-center text-[10px] font-bold text-[#8b8f97]">分镜数量</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {NARRATIVE_SECTIONS.map((section) => (
-                      <tr key={section.sect_id} className="border-t border-[var(--line)]">
-                        <td className="px-3 py-2.5">
-                          <span className="inline-flex items-center gap-2">
-                            <span className="rounded bg-[#17181c] px-2 py-1 text-[9.5px] font-extrabold text-white">阶段 {section.sect_id + 1}</span>
-                            <span className="text-[11.5px] font-extrabold text-[#202229]">{getNarrativeRoleLabel(section.role).split(" / ")[0]}</span>
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 text-[10.5px] font-medium text-[#202229]">{formatTimeRangeInSeconds(section.time)}</td>
-                        <td className="px-3 py-2.5 text-[11px] leading-5 text-[#202229]">{section.function_brief}</td>
-                        <td className="px-3 py-2.5 text-center text-[11px] font-bold text-[#202229]">{section.scenes.length}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
           <section>
             <div className="flex items-center justify-between">
-              <h3 className="text-[14px] font-extrabold text-[#292c32]">叙事结构</h3>
-              <span className="text-[10.5px] text-[#9699a1]">{NARRATIVE_SECTIONS.length} 个叙事阶段</span>
+              <h3 className="text-[14px] font-extrabold text-[#16233a]">叙事结构</h3>
+              <span className="text-[10.5px] text-[#94a0b4]">{NARRATIVE_SECTIONS.length} 个叙事阶段</span>
             </div>
             <div className="mt-3 space-y-3">
               {NARRATIVE_SECTIONS.map((section, sectionIndex) => (
@@ -1108,26 +1198,26 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                   key={section.sect_id}
                   open={sectionIndex === 0}
                   className={cn(
-                    "overflow-hidden rounded-xl border bg-white",
-                    activeSection === section.sect_id ? "border-[#9ebd3f]" : "border-[var(--line)]",
+                    "overflow-hidden rounded-xl border bg-white transition-shadow",
+                    activeSection === section.sect_id ? "border-[#99dc38] ring-2 ring-[#d8ff8a] shadow-[0_10px_28px_rgba(126,183,28,0.10)]" : "border-[#dfe4ec]",
                   )}
                 >
                   <summary
                     onClick={() => selectSection(section)}
                     className={cn(
                       "cursor-pointer list-none px-4 py-3",
-                      activeSection === section.sect_id ? "bg-[#fbfff1]" : "bg-[#fafafa]",
+                      activeSection === section.sect_id ? "bg-[#fbfff2]" : "bg-[#f8fafc]",
                     )}
                   >
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="shrink-0 rounded bg-[#17181c] px-2 py-1 text-[10px] font-extrabold text-white">阶段 {section.sect_id + 1}</span>
-                      <span className="shrink-0 text-[13px] font-extrabold text-[#292c32]">{getNarrativeRoleLabel(section.role).split(" / ")[0]}</span>
-                      <span className="shrink-0 text-[10.5px] text-[#8b8f97]">{formatTimeRangeInSeconds(section.time)}</span>
-                      <span className="min-w-0 flex-1 border-l border-[#cfd3d8] pl-2 text-[12px] font-bold leading-5 text-[#202229]">{section.function_brief}</span>
-                      <ChevronDown size={14} className="shrink-0 text-[#777b84]" />
+                      <span className="shrink-0 rounded-full border px-2 py-1 text-[10px] font-extrabold" style={getNarrativeStageTone(section.sect_id)}>阶段 {section.sect_id + 1}</span>
+                      <span className="shrink-0 text-[13px] font-extrabold text-[#16233a]">{getNarrativeRoleLabel(section.role).split(" / ")[0]}</span>
+                      <span className="shrink-0 text-[10.5px] text-[#8e9aaf]">{formatTimeRangeInSeconds(section.time)}</span>
+                      <span className="min-w-0 flex-1 border-l border-[#d9e0e9] pl-2 text-[12px] font-bold leading-5 text-[#152238]">{section.function_brief}</span>
+                      <ChevronDown size={14} className="shrink-0 text-[#8e9aaf]" />
                     </span>
                   </summary>
-                  <div className="space-y-4 border-t border-[var(--line)] p-4">
+                  <div className="space-y-4 border-t border-[#e3e8ef] p-4">
                     <div className="grid gap-3 md:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]">
                       <div className="md:col-span-2">
                         <InfoField label="创意策略" value={section.strategy} />
@@ -1136,10 +1226,10 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                         <InfoField label="创意描述" value={section.description} />
                       </div>
                       <div className="md:col-span-2">
-                        <span className="text-[10.5px] font-bold text-[#9699a1]">关键信息</span>
+                        <span className="text-[10.5px] font-bold text-[#94a0b4]">关键信息</span>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {section.key_messages.map((message) => (
-                            <span key={message} className="rounded-full border border-[#dce7b9] bg-[#f6ffdc] px-2.5 py-1 text-[10.5px] font-bold text-[#4d5d22]">
+                            <span key={message} className="rounded-full border border-[#d7eb9a] bg-[#efffc4] px-2.5 py-1 text-[10.5px] font-bold text-[#55701c]">
                               {message}
                             </span>
                           ))}
@@ -1148,13 +1238,13 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                     </div>
 
                     <div>
-                      <h4 className="text-[11.5px] font-extrabold text-[#444850]">分镜</h4>
+                      <h4 className="text-[11.5px] font-extrabold text-[#16233a]">分镜</h4>
                       <div className="mt-2 space-y-2">
                         {section.scenes.map((scene, sceneIndex) => (
-                          <details key={scene.scene_id} open className="overflow-hidden rounded-lg border border-[var(--line)] bg-[#fcfcfc]">
+                          <details key={scene.scene_id} open className="overflow-hidden rounded-lg border border-[#e2e7ee] bg-[#f8fafc]">
                             <summary className="cursor-pointer list-none px-3 py-2.5">
                               <span className="flex flex-wrap items-center gap-2">
-                                <span className="rounded bg-[#eceef1] px-2 py-1 text-[10px] font-extrabold text-[#50545c]">
+                                <span className="rounded bg-[#edf1f5] px-2 py-1 text-[10px] font-extrabold text-[#536078]">
                                   分镜{" "}
                                   {NARRATIVE_SECTIONS.slice(0, sectionIndex).reduce(
                                     (total, item) => total + item.scenes.length,
@@ -1163,18 +1253,18 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
                                     sceneIndex +
                                     1}
                                 </span>
-                                <span className="text-[10.5px] text-[#747880]">{formatTimeRangeInSeconds(scene.time)}</span>
-                                <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#747880]">时长 {Math.round(scene.duration)}s</span>
-                                <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#747880]">
+                                <span className="text-[10.5px] text-[#6f7b90]">{formatTimeRangeInSeconds(scene.time)}</span>
+                                <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#6f7b90]">时长 {Math.round(scene.duration)}s</span>
+                                <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#6f7b90]">
                                   讲话者 {scene.transcript[0]?.speaker}
                                 </span>
-                                <ChevronDown size={13} className="ml-auto text-[#9699a1]" />
+                                <ChevronDown size={13} className="ml-auto text-[#94a0b4]" />
                               </span>
                             </summary>
-                            <div className="space-y-3 border-t border-[var(--line)] bg-white p-3">
-                              <div className="space-y-2 rounded-lg bg-[#f8f9fa] p-3">
+                            <div className="space-y-3 border-t border-[#e3e8ef] bg-white p-3">
+                              <div className="space-y-2 rounded-lg bg-[#f5f7fa] p-3">
                                 <InfoField label="口播内容" value={scene.transcript.map((line) => line.content).filter(Boolean).join(" ")} />
-                                <InfoField label="口播中文翻译" value={scene.transcript.map((line) => line.content_chinese).filter(Boolean).join(" ")} />
+                                <InfoField label="口播翻译" value={scene.transcript.map((line) => line.content_chinese).filter(Boolean).join(" ")} />
                               </div>
                               <InfoField label="画面内容" value={scene.video_layer} />
                             </div>
@@ -1351,6 +1441,7 @@ function ProductStep({
   const [knowledgeDraft, setKnowledgeDraft] = useState(INITIAL_PRODUCT_KNOWLEDGE)
   const [isEditingKnowledge, setIsEditingKnowledge] = useState(false)
   const [dhModalOpen, setDhModalOpen] = useState(false)
+  const [productPickerOpen, setProductPickerOpen] = useState(false)
   const [productImages, setProductImages] = useState(() => [
     { id: "source-product-image", src: material.cover, name: "商品图 1" },
   ])
@@ -1412,7 +1503,29 @@ function ProductStep({
     setIsEditingKnowledge(false)
   }
 
+  function selectLibraryProduct(product: Product) {
+    const nextKnowledge = [
+      `商品名称：${product.name}`,
+      `商品描述：${product.description}`,
+      `核心卖点：${product.sellingPoints.join("；")}`,
+      `目标人群：${product.audiences.join("；")}`,
+      `使用场景：${product.scenarios.join("；")}`,
+    ].join("\n")
+    const libraryImage = { id: `library-${product.id}`, src: product.image, name: product.name }
+
+    onProductName(product.name)
+    onBrandName(product.brand)
+    onDescription(product.description)
+    onSellingPoints(product.sellingPoints.join("\n"))
+    setProductKnowledge(nextKnowledge)
+    setKnowledgeDraft(nextKnowledge)
+    setProductImages([libraryImage])
+    setActiveProductImageId(libraryImage.id)
+    setProductPickerOpen(false)
+  }
+
   return (
+    <>
     <section>
       <StepHeader title="确认替换商品和模特" description="选择原视频中要替换的商品与人物，并核对新商品事实和新人物模特。" />
       <div className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -1488,11 +1601,16 @@ function ProductStep({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[14px] font-extrabold text-[#292c32]">新商品信息</h3>
-            <span className="rounded bg-[#f1f2f4] px-2 py-1 text-[9.5px] font-bold text-[#686c75]">
-              将替换：{selectedTargetProduct.shortName}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-[14px] font-extrabold text-[#292c32]">新商品信息</h3>
+              <span className="rounded bg-[#f1f2f4] px-2 py-1 text-[9.5px] font-bold text-[#686c75]">
+                将替换：{selectedTargetProduct.shortName}
+              </span>
+            </div>
+            <button type="button" onClick={() => setProductPickerOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#d7ddc6] bg-white px-3 text-[11px] font-extrabold text-[#4d5637] shadow-sm transition hover:border-[#9ebd3f] hover:bg-[#fbfff2]">
+              <Search size={13} />从商品库选择
+            </button>
           </div>
           <div className="mt-3 grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
             <div>
@@ -1772,6 +1890,8 @@ function ProductStep({
         onConfirm={onDigitalHuman}
       />
     </section>
+    <ProductPickerDialog open={productPickerOpen} onOpenChange={setProductPickerOpen} onSelect={selectLibraryProduct} />
+    </>
   )
 }
 
@@ -1830,16 +1950,16 @@ function ScriptStep({
   }
 
   return (
-    <section>
+    <section className="text-[#152238]">
       <StepHeader title="确认转写后的脚本" description="继承参考视频的爆款叙事骨架，完成新商品策略、阶段结构、镜头、口播与字幕的整套转写" />
       <div className="mt-5 space-y-5">
-        <section className="rounded-xl border border-[var(--line)] bg-white p-4">
+        <section className="rounded-2xl border border-[#dfe4ec] bg-white p-5 shadow-[0_8px_24px_rgba(24,35,56,0.04)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-[14px] font-extrabold text-[#292c32]">新创意策略摘要</h3>
-              <p className="mt-1 text-[10.5px] text-[#9699a1]">从原片爆款机制到新商品内容的整体映射</p>
+              <h3 className="flex items-center gap-2 text-[14px] font-extrabold text-[#16233a]"><span className="inline-flex size-8 items-center justify-center rounded-lg bg-[#efffc4] text-[#5f8f19]"><WandSparkles size={15} /></span>新创意策略摘要</h3>
+              <p className="mt-1 text-[10.5px] text-[#94a0b4]">从原片爆款机制到新商品内容的整体映射</p>
             </div>
-            <span className="rounded-full border border-[#dce7b9] bg-[#f6ffdc] px-2.5 py-1 text-[10px] font-extrabold text-[#566528]">
+            <span className="rounded-full border border-[#d7eb9a] bg-[#efffc4] px-2.5 py-1 text-[10px] font-extrabold text-[#55701c]">
               {scripts.length} 个叙事阶段 · {totalShots} 个分镜
             </span>
           </div>
@@ -1852,56 +1972,19 @@ function ScriptStep({
               <InfoField label="使用场景" value={SCRIPT_BRIEF.useScenarios.join("、")} />
             </div>
             <div>
-              <InfoField label="情绪曲线" value={SCRIPT_BRIEF.emotionalJourney.join(" → ")} />
+              <EmotionJourney items={SCRIPT_BRIEF.emotionalJourney} />
             </div>
           </div>
         </section>
 
-        <section className="border-b border-[var(--line)] pb-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[14px] font-extrabold text-[#292c32]">叙事结构概览</h3>
-            <span className="text-[10.5px] text-[#9699a1]">
-              {scripts.length} 个阶段 · {totalShots} 个分镜
-            </span>
-          </div>
-          <div className="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] table-fixed border-collapse text-left whitespace-nowrap">
-                <thead className="bg-[#f6f7f8]">
-                  <tr>
-                    <th scope="col" className="w-[30%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">阶段</th>
-                    <th scope="col" className="w-[18%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">时间</th>
-                    <th scope="col" className="w-[40%] px-3 py-2 text-[10px] font-bold text-[#8b8f97]">阶段摘要</th>
-                    <th scope="col" className="w-[12%] px-3 py-2 text-center text-[10px] font-bold text-[#8b8f97]">分镜数量</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {scripts.map((scene, sceneIndex) => (
-                    <tr key={scene.id} className="border-t border-[var(--line)]">
-                      <td className="px-3 py-2.5">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="rounded bg-[#17181c] px-2 py-1 text-[9.5px] font-extrabold text-white">阶段 {sceneIndex + 1}</span>
-                          <span className="text-[11.5px] font-extrabold text-[#202229]">{getNarrativeRoleLabel(scene.role).split(" / ")[0]}</span>
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 text-[10.5px] font-medium text-[#202229]">{formatTimeRangeInSeconds(scene.time)}</td>
-                      <td className="px-3 py-2.5 text-[11px] leading-5 text-[#202229]">{scene.functionBrief}</td>
-                      <td className="px-3 py-2.5 text-center text-[11px] font-bold text-[#202229]">{scene.shots.length}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-[14px] font-extrabold text-[#292c32]">
+              <h3 className="text-[14px] font-extrabold text-[#16233a]">
                 分镜脚本
                 <span className="ml-1 text-[#e5484d]">（可校正修改口播文案）</span>
               </h3>
-              <p className="mt-1 text-[10.5px] text-[#9699a1]">按参考视频叙事阶段组织，阶段内拆分为可直接执行的镜头</p>
+              <p className="mt-1 text-[10.5px] text-[#94a0b4]">按参考视频叙事阶段组织，阶段内拆分为可直接执行的镜头</p>
             </div>
 
           </div>
@@ -1910,66 +1993,66 @@ function ScriptStep({
               const roleLabel = getNarrativeRoleLabel(scene.role).split(" / ")[0]
               const shotOffset = scripts.slice(0, sceneIndex).reduce((total, item) => total + item.shots.length, 0)
               return (
-                <details key={scene.id} open={sceneIndex === 0} className="overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-                  <summary className="cursor-pointer list-none bg-[#fafafa] px-4 py-3">
+                <details key={scene.id} open={sceneIndex === 0} className={cn("overflow-hidden rounded-xl border bg-white transition-shadow", sceneIndex === 0 ? "border-[#99dc38] ring-2 ring-[#d8ff8a] shadow-[0_10px_28px_rgba(126,183,28,0.10)]" : "border-[#dfe4ec]")}>
+                  <summary className={cn("cursor-pointer list-none px-4 py-3", sceneIndex === 0 ? "bg-[#fbfff2]" : "bg-[#f8fafc]")}>
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="shrink-0 rounded bg-[#17181c] px-2 py-1 text-[10px] font-extrabold text-white">阶段 {sceneIndex + 1}</span>
-                      <span className="shrink-0 text-[13px] font-extrabold text-[#292c32]">{roleLabel}</span>
-                      <span className="shrink-0 text-[10.5px] text-[#8b8f97]">{formatTimeRangeInSeconds(scene.time)}</span>
-                      <span className="min-w-0 flex-1 border-l border-[#cfd3d8] pl-2 text-[12px] font-bold leading-5 text-[#202229]">{scene.functionBrief}</span>
-                      <ChevronDown size={14} className="shrink-0 text-[#777b84]" />
+                      <span className="shrink-0 rounded-full border px-2 py-1 text-[10px] font-extrabold" style={getNarrativeStageTone(sceneIndex)}>阶段 {sceneIndex + 1}</span>
+                      <span className="shrink-0 text-[13px] font-extrabold text-[#16233a]">{roleLabel}</span>
+                      <span className="shrink-0 text-[10.5px] text-[#8e9aaf]">{formatTimeRangeInSeconds(scene.time)}</span>
+                      <span className="min-w-0 flex-1 border-l border-[#d9e0e9] pl-2 text-[12px] font-bold leading-5 text-[#152238]">{scene.functionBrief}</span>
+                      <ChevronDown size={14} className="shrink-0 text-[#8e9aaf]" />
                     </span>
                   </summary>
 
-                  <div className="space-y-4 border-t border-[var(--line)] p-4">
+                  <div className="space-y-4 border-t border-[#e3e8ef] p-4">
                     <div className="grid gap-3 md:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]">
                       <div className="md:col-span-2"><InfoField label="创意策略" value={scene.strategy} /></div>
                       <div className="md:col-span-2"><InfoField label="创意描述" value={scene.description} /></div>
                       <div className="md:col-span-2">
-                        <span className="text-[10.5px] font-bold text-[#9699a1]">关键信息</span>
+                        <span className="text-[10.5px] font-bold text-[#94a0b4]">关键信息</span>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {scene.keyMessages.map((message) => (
-                            <span key={message} className="rounded-full border border-[#dce7b9] bg-[#f6ffdc] px-2.5 py-1 text-[10.5px] font-bold text-[#4d5d22]">{message}</span>
+                            <span key={message} className="rounded-full border border-[#d7eb9a] bg-[#efffc4] px-2.5 py-1 text-[10.5px] font-bold text-[#55701c]">{message}</span>
                           ))}
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-[11.5px] font-extrabold text-[#444850]">分镜</h4>
+                      <h4 className="text-[11.5px] font-extrabold text-[#16233a]">分镜</h4>
                       <div className="mt-2 space-y-2">
                         {scene.shots.map((shot, shotIndex) => {
                           const shotNumber = shotOffset + shotIndex + 1
                           return (
-                            <details key={shot.id} open={sceneIndex === 0} className="overflow-hidden rounded-lg border border-[var(--line)] bg-[#fcfcfc]">
+                            <details key={shot.id} open={sceneIndex === 0} className="overflow-hidden rounded-lg border border-[#e2e7ee] bg-[#f8fafc]">
                               <summary className="cursor-pointer list-none px-3 py-2.5">
                                 <span className="flex flex-wrap items-center gap-2">
-                                  <span className="rounded bg-[#eceef1] px-2 py-1 text-[10px] font-extrabold text-[#50545c]">分镜 {shotNumber}</span>
-                                  <span className="text-[10.5px] text-[#747880]">{formatTimeRangeInSeconds(shot.time)}</span>
-                                  <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#747880]">时长 {Math.round(shot.duration)}s</span>
-                                  <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#747880]">讲话者 {shot.speaker}</span>
-                                  <ChevronDown size={13} className="ml-auto text-[#9699a1]" />
+                                  <span className="rounded bg-[#edf1f5] px-2 py-1 text-[10px] font-extrabold text-[#536078]">分镜 {shotNumber}</span>
+                                  <span className="text-[10.5px] text-[#6f7b90]">{formatTimeRangeInSeconds(shot.time)}</span>
+                                  <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#6f7b90]">时长 {Math.round(shot.duration)}s</span>
+                                  <span className="rounded-full bg-white px-2 py-1 text-[10px] text-[#6f7b90]">讲话者 {shot.speaker}</span>
+                                  <ChevronDown size={13} className="ml-auto text-[#94a0b4]" />
                                 </span>
                               </summary>
 
-                              <div className="space-y-3 border-t border-[var(--line)] bg-white p-3">
+                              <div className="space-y-3 border-t border-[#e3e8ef] bg-white p-3">
                                 {editingShotId === shot.id ? (
-                                  <div className="rounded-lg bg-[#f8f9fa] p-3">
+                                  <div className="rounded-lg bg-[#f5f7fa] p-3">
                                     <label>
-                                      <span className="text-[10px] font-bold text-[#9a9da5]">口播内容</span>
+                                      <span className="text-[10px] font-bold text-[#94a0b4]">口播内容</span>
                                       <textarea
                                         value={voiceoverDraft}
                                         aria-label={`编辑分镜 ${shotNumber} 口播文案`}
                                         onChange={(event) => updateVoiceoverDraft(shot, event.target.value)}
-                                        className="mt-1 min-h-20 w-full resize-none rounded-md border border-[#cfd6b8] p-2.5 text-[11.5px] leading-5 outline-none focus:border-[#9aa36d] focus:ring-2 focus:ring-[#dff0a6]"
+                                        className="mt-1 min-h-20 w-full resize-none rounded-md border border-[#d9e0e9] bg-white p-2.5 text-[11.5px] leading-5 text-[#152238] outline-none focus:border-[#8acb2f] focus:ring-2 focus:ring-[#d8ff8a]"
                                       />
                                     </label>
                                     <div className="mt-2">
                                       <div className="flex items-center justify-between gap-3">
-                                        <span className="text-[10px] font-bold text-[#9a9da5]">口播中文翻译</span>
-                                        <span className="text-[9.5px] font-bold text-[#879064]">根据口播语言自动翻译为中文</span>
+                                        <span className="text-[10px] font-bold text-[#94a0b4]">口播翻译</span>
+                                        <span className="text-[9.5px] font-bold text-[#5f8f19]">根据口播语言自动翻译</span>
                                       </div>
-                                      <div aria-label={`分镜 ${shotNumber} 中文翻译（自动同步）`} aria-live="polite" className="mt-1 min-h-16 rounded-md bg-[#f5f6f7] p-2.5 text-[11px] leading-5 text-[#666a72]">
+                                      <div aria-label={`分镜 ${shotNumber} 中文翻译（自动同步）`} aria-live="polite" className="mt-1 min-h-16 rounded-md bg-white p-2.5 text-[11px] leading-5 text-[#536078]">
                                         {voiceoverTranslationDraft}
                                       </div>
                                     </div>
@@ -1979,11 +2062,11 @@ function ScriptStep({
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="rounded-lg bg-[#f8f9fa] p-3">
+                                  <div className="rounded-lg bg-[#f5f7fa] p-3">
                                     <InfoField label="口播内容" value={shot.voiceover} />
-                                    <div className="mt-2 border-t border-dashed border-[#e3e4e7] pt-2"><InfoField label="口播中文翻译" value={shot.voiceoverTranslation} /></div>
+                                    <div className="mt-2 border-t border-dashed border-[#dde3eb] pt-2"><InfoField label="口播翻译" value={shot.voiceoverTranslation} /></div>
                                     <div className="mt-3 flex justify-end">
-                                      <button type="button" aria-label={`修改分镜 ${shotNumber} 口播文案`} disabled={editingShotId !== null} onClick={() => startEditingVoiceover(shot)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#bfc99d] bg-white px-3 text-[10.5px] font-bold text-[#4d5637] hover:border-[#9ebd3f] hover:bg-[#f7faec] disabled:cursor-not-allowed disabled:opacity-45"><Pencil size={11} />修改</button>
+                                      <button type="button" aria-label={`修改分镜 ${shotNumber} 口播文案`} disabled={editingShotId !== null} onClick={() => startEditingVoiceover(shot)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#b8d875] bg-white px-3 text-[10.5px] font-bold text-[#55701c] hover:border-[#8acb2f] hover:bg-[#f4ffd8] disabled:cursor-not-allowed disabled:opacity-45"><Pencil size={11} />修改</button>
                                     </div>
                                   </div>
                                 )}
@@ -2324,7 +2407,7 @@ function WorkspaceFooter({
               {activeConfigPopup === "model" && (
                 <FooterPopup className="w-[224px] p-2">
                   <p className="px-2 pb-1.5 text-[10px] font-bold text-[#9699a1]">生成模型</p>
-                  {["Seedance 2.0", "HappyHorse 1.1"].map((option) => (
+                  {["Seedance 2.0"].map((option) => (
                     <button
                       key={option}
                       type="button"
@@ -2520,8 +2603,20 @@ function StepHeader({ title, description, centered = false }: { title: string; d
   )
 }
 
+function EmotionJourney({ items }: { items: string[] }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold text-[#94a0b4]">情绪曲线</p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {items.map((item) => <span key={item} className="rounded-full border border-[#ddd2ff] bg-[#f2edff] px-2.5 py-1 text-[10.5px] font-extrabold text-[#7436d9]">{item}</span>)}
+      </div>
+    </div>
+  )
+}
+
+
 function InfoField({ label, value }: { label: string; value: string }) {
-  return <div><p className="text-[10px] font-bold text-[#9a9da5]">{label}</p><p className="mt-1 text-[11.5px] leading-5 text-[#202229]">{value}</p></div>
+  return <div><p className="text-[10px] font-bold text-[#94a0b4]">{label}</p><p className="mt-1 text-[11.5px] leading-5 text-[#152238]">{value}</p></div>
 }
 
 function DetectedItem({

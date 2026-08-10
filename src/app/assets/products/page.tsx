@@ -1,5 +1,5 @@
-import { AssetShell } from "@/components/assets/asset-shell"
+import { ProductLibraryDemo } from "@/components/products/product-library-demo"
 
 export default function Page() {
-  return <AssetShell tab="products" />
+  return <ProductLibraryDemo />
 }

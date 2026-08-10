@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { FileText, BarChart2, BookOpen, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ProductPickerDialog } from "@/components/products/product-picker-dialog"
+import type { Product } from "@/components/products/product-data"
 import { ReportMode } from "./modes/report-mode"
 import { AnalysisMode } from "./modes/analysis-mode"
 import { BriefMode } from "./modes/brief-mode"
@@ -38,6 +40,8 @@ interface Props {
 
 export function AssistantChat({ mode: controlledMode, onModeChange, prefill, onFirstWin, submitting }: Props = {}) {
   const [internalMode, setInternalMode] = useState<ModeId>("report")
+  const [productPickerOpen, setProductPickerOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const mode = controlledMode ?? internalMode
   const setMode = (m: ModeId) => {
     if (controlledMode === undefined) setInternalMode(m)
@@ -80,6 +84,9 @@ export function AssistantChat({ mode: controlledMode, onModeChange, prefill, onF
         {mode === "analysis" && (
           <AnalysisMode
             initialPrompt={prefill?.analysis}
+            onSelectProduct={() => setProductPickerOpen(true)}
+            selectedProduct={selectedProduct}
+            onRemoveProduct={() => setSelectedProduct(null)}
             onSubmit={() => onFirstWin?.("analysis")}
             submitting={submitting}
           />
@@ -87,6 +94,9 @@ export function AssistantChat({ mode: controlledMode, onModeChange, prefill, onF
         {mode === "brief" && (
           <BriefMode
             initialPrompt={prefill?.brief}
+            onSelectProduct={() => setProductPickerOpen(true)}
+            selectedProduct={selectedProduct}
+            onRemoveProduct={() => setSelectedProduct(null)}
             onSubmit={() => onFirstWin?.("brief")}
             submitting={submitting}
           />
@@ -99,6 +109,7 @@ export function AssistantChat({ mode: controlledMode, onModeChange, prefill, onF
           />
         )}
       </div>
+      <ProductPickerDialog open={productPickerOpen} onOpenChange={setProductPickerOpen} selectedId={selectedProduct?.id} onSelect={setSelectedProduct} />
     </div>
   )
 }

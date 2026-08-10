@@ -1,5 +1,5 @@
 export type AssetKind = "image" | "video" | "avatar" | "product" | "trashed"
-export type AssetTab = "generated" | "uploaded" | "avatars" | "products" | "trash"
+export type AssetTab = "reports" | "analysis" | "briefs" | "generated" | "uploaded" | "avatars" | "products" | "trash"
 
 export type AssetItem = {
   id: string
@@ -13,6 +13,8 @@ export type AssetItem = {
   sizeKB: number
   /** 原始名称 / Prompt 摘要 */
   caption?: string
+  avatarGender?: "male" | "female"
+  avatarScope?: "official" | "mine"
   /** 用于 trash tab：删除时间 */
   deletedAt?: string
 }
@@ -62,6 +64,26 @@ export const ASSETS_GENERATED: AssetItem[] = Array.from({ length: 24 }, (_, i) =
   }
 })
 
+export const ASSETS_REPORTS: AssetItem[] = ASSETS_GENERATED.slice(0, 8).map((item, index) => ({
+  ...item,
+  id: `report_${index + 1}`,
+  kind: "image",
+  caption: ["美妆赛道周报", "运动服饰趋势报告", "家居品类增长洞察", "TikTok 创意周报", "北美市场趋势", "东南亚热卖品类", "季度素材复盘", "竞品投放报告"][index],
+}))
+
+export const ASSETS_ANALYSIS: AssetItem[] = ASSETS_GENERATED.slice(8, 16).map((item, index) => ({
+  ...item,
+  id: `analysis_${index + 1}`,
+  caption: ["高 CTR 素材分析", "爆款叙事结构拆解", "前三秒 Hook 分析", "高转化口播分析", "素材疲劳度分析", "竞品广告分析", "受众反馈分析", "视频节奏分析"][index],
+}))
+
+export const ASSETS_BRIEFS: AssetItem[] = ASSETS_GENERATED.slice(16, 24).map((item, index) => ({
+  ...item,
+  id: `brief_${index + 1}`,
+  kind: "image",
+  caption: ["运动内衣 UGC Brief", "便携榨汁杯 Brief", "婚纱广告 Brief", "美妆测评 Brief", "家居好物 Brief", "户外装备 Brief", "节日促销 Brief", "新品首发 Brief"][index],
+}))
+
 export const ASSETS_UPLOADED: AssetItem[] = Array.from({ length: 16 }, (_, i) => ({
   id: `up_${i + 1}`,
   kind: i % 4 === 0 ? "video" : "image",
@@ -75,11 +97,13 @@ export const ASSETS_UPLOADED: AssetItem[] = Array.from({ length: 16 }, (_, i) =>
 export const ASSETS_AVATARS: AssetItem[] = Array.from({ length: 12 }, (_, i) => ({
   id: `av_${i + 1}`,
   kind: "avatar",
-  thumb: makeImage(`av_${i + 11}`, "1:1"),
+  thumb: `https://i.pravatar.cc/640?img=${i + 11}`,
   ratio: "1:1",
   timeLabel: pickTime(i + 1),
   sizeKB: 96 + i * 8,
   caption: ["小美", "Anna", "Vince", "Kai", "Mei", "Leo", "Sofia", "Hank", "Lina", "Max", "Eli", "Yui"][i],
+  avatarGender: (["female", "female", "male", "male", "female", "male", "female", "male", "female", "male", "male", "female"] as const)[i],
+  avatarScope: i < 6 ? "official" : "mine",
 }))
 
 export const ASSETS_PRODUCTS: AssetItem[] = Array.from({ length: 14 }, (_, i) => ({
@@ -104,6 +128,9 @@ export const ASSETS_TRASH: AssetItem[] = Array.from({ length: 8 }, (_, i) => ({
 }))
 
 export const ASSETS_BY_TAB: Record<AssetTab, AssetItem[]> = {
+  reports:   ASSETS_REPORTS,
+  analysis:  ASSETS_ANALYSIS,
+  briefs:    ASSETS_BRIEFS,
   generated: ASSETS_GENERATED,
   uploaded:  ASSETS_UPLOADED,
   avatars:   ASSETS_AVATARS,

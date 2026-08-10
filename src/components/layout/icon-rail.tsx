@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Fragment } from "react"
-import { PanelLeftOpen, Sparkles } from "lucide-react"
+import { PanelLeftOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { findActiveSubMenuHref, navSections, getSectionByPath, type NavSection } from "@/lib/nav-config"
 import { useSidebarCollapsed } from "@/lib/layout/sidebar-state"
@@ -57,14 +57,6 @@ export function IconRail() {
 function RailAccountSummary() {
   return (
     <div className="flex flex-col items-center gap-2 pb-1">
-      <Link
-        href="/settings/credits"
-        aria-label="剩余积分 200"
-        className="group relative inline-flex h-[40px] w-[40px] flex-col items-center justify-center rounded-lg border border-[var(--line)] bg-white text-[#18181b] shadow-[0_6px_18px_rgba(9,9,11,0.08)] transition-colors hover:border-[#d1d5db]"
-      >
-        <Sparkles size={10} strokeWidth={2.4} />
-        <span className="mt-1 text-[12px] font-extrabold leading-none tabular-nums">200</span>
-      </Link>
       <Link
         href="/settings/account"
         aria-label="用户账号 Default"

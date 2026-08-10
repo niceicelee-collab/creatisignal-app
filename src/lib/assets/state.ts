@@ -12,7 +12,7 @@ type AssetsState = {
 
 function defaultState(): AssetsState {
   return {
-    added: { generated: [], uploaded: [], avatars: [], products: [], trash: [] },
+    added: { reports: [], analysis: [], briefs: [], generated: [], uploaded: [], avatars: [], products: [], trash: [] },
   }
 }
 

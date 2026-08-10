@@ -1,7 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
-import { ScrollText, Sparkles } from "lucide-react"
+import { Coins, ScrollText, Sparkles } from "lucide-react"
 import { Topbar } from "@/components/layout/topbar"
 import { SettingsShell } from "@/components/settings/settings-shell"
 import { SettingsCard } from "@/components/settings/settings-card"
@@ -12,6 +13,7 @@ type LedgerDirection = "获得" | "消耗"
 type LedgerEntry = {
   id: string
   title: string
+  detail?: string
   direction: LedgerDirection
   time: string
   delta: number
@@ -24,6 +26,14 @@ const BALANCE = {
 }
 
 const INITIAL_LEDGER: LedgerEntry[] = [
+  {
+    id: "l0",
+    title: "\u52a0\u91cf\u5305\u5145\u503c\u5230\u8d26",
+    detail: "\u6708\u5ea6\u5236\u4f5c\u5305 \u00b7 \u8d2d\u4e70\u79ef\u5206 220,650 + \u8d60\u9001\u79ef\u5206 6,620",
+    direction: "\u83b7\u5f97",
+    time: "2026-07-09 10:16",
+    delta: 227270,
+  },
   { id: "l1", title: "每日刷新", direction: "获得", time: "2026-07-09 00:00", delta: 200 },
   { id: "l2", title: "到期清零", direction: "消耗", time: "2026-07-08 23:59", delta: -200 },
   { id: "l3", title: "生成视频", direction: "消耗", time: "2026-07-08 18:20", delta: -135 },
@@ -54,8 +64,21 @@ export default function CreditsPage() {
   return (
     <>
       <Topbar title="积分" />
-      <SettingsShell title="积分">
-        <SettingsCard icon={Sparkles} title="积分余额" allowOverflow>
+      <SettingsShell title="积分" subtitle="查看积分余额、购买充值积分与最近一个月的积分明细。">
+        <SettingsCard
+          icon={Sparkles}
+          title="积分余额"
+          allowOverflow
+          actions={
+            <Link
+              href="/settings/credits/purchase"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--lime)] px-4 text-[12px] font-extrabold text-[#18181b] shadow-[0_8px_22px_rgba(169,214,31,0.2)] transition-transform hover:-translate-y-0.5"
+            >
+              <Coins size={13} strokeWidth={2.4} />
+              加量包
+            </Link>
+          }
+        >
           <div className="grid grid-cols-[max-content_minmax(48px,1fr)_max-content_minmax(48px,1fr)_max-content_minmax(48px,1fr)_max-content] items-start gap-0 overflow-visible pb-1">
             <BalanceFigure label="剩余积分" value={remainingCredits} strong />
             <FormulaSign label="=" />
@@ -98,6 +121,9 @@ export default function CreditsPage() {
                 <li key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3">
                   <div className="min-w-0">
                     <p className="text-[13px] font-extrabold text-[var(--text)] leading-tight">{item.title}</p>
+                    {item.detail && (
+                      <p className="mt-1 text-[12px] font-medium text-[#4b5563]">{item.detail}</p>
+                    )}
                     <p className="mt-1 text-[12px] font-medium text-[#8b98a9] tabular-nums">{item.time}</p>
                   </div>
                   <p
