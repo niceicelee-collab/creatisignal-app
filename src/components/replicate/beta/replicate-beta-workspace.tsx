@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -37,7 +37,6 @@ import { DigitalHumanModal, type DHItem } from "@/components/modals/digital-huma
 import { ProductPickerDialog } from "@/components/products/product-picker-dialog"
 import type { Product } from "@/components/products/product-data"
 import {
-  BETA_MATERIALS,
   BETA_PROJECTS,
   SCRIPT_BRIEF,
   SCRIPT_SCENES,
@@ -62,10 +61,34 @@ import {
   REPLICATE_SOURCE_TABS,
   WORKSPACE_MATERIALS,
 } from "@/lib/replicate/source-filters"
+import {
+  getBetaProjectName,
+  getBetaProjectNamesServerSnapshot,
+  getBetaProjectNamesSnapshot,
+  saveBetaProjectName,
+  subscribeBetaProjectNames,
+} from "@/lib/replicate/beta-project-names"
 import { cn } from "@/lib/utils"
 
 type StepId = 1 | 2 | 3 | 4
 type RenderStatus = "idle" | "rendering" | "completed" | "failed"
+type PersonReplacementMode = "digital-human" | "auto"
+
+interface VideoVersion {
+  id: string
+  note: string
+  createdAt: string
+  video: string
+  poster: string
+  sourceTitle: string
+  productName: string
+  model: string
+  resolution: string
+  ratio: string
+  duration: number
+  language: string
+  subtitles: string
+}
 
 interface Props {
   projectId: string
@@ -401,10 +424,10 @@ const INITIAL_PRODUCT_KNOWLEDGE = `材质：高弹锦纶混纺；
 风险声明：避免使用“矫正体态”等缺少证据的绝对化表述。`
 
 const STEPS: { id: StepId; label: string }[] = [
-  { id: 1, label: "选择素材" },
-  { id: 2, label: "爆款拆解" },
-  { id: 3, label: "新商品信息确认" },
-  { id: 4, label: "脚本转写 & 确认生成" },
+  { id: 1, label: "爆款拆解" },
+  { id: 2, label: "新商品信息确认" },
+  { id: 3, label: "脚本转写" },
+  { id: 4, label: "视频生成" },
 ]
 
 const VOICEOVER_LANGUAGES = ["英语", "法语", "德语", "西班牙", "印尼", "马来", "泰语", "越南语"]
@@ -418,13 +441,13 @@ function getEstimatedRenderCost(duration: number, resolution: string) {
 function getInitialState(projectId: string) {
   const status = BETA_PROJECTS.find((project) => project.id === projectId)?.status
 
-  if (status === "completed") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "completed" as RenderStatus }
-  if (status === "failed") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "failed" as RenderStatus }
-  if (status === "rendering") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "rendering" as RenderStatus }
-  if (status === "script_pending" || status === "script_generating") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "idle" as RenderStatus }
-  if (status === "product_pending") return { step: 3 as StepId, maxStep: 3 as StepId, renderStatus: "idle" as RenderStatus }
-  if (status === "breaking_down") return { step: 2 as StepId, maxStep: 2 as StepId, renderStatus: "idle" as RenderStatus }
-  return { step: 1 as StepId, maxStep: 1 as StepId, renderStatus: "idle" as RenderStatus }
+  if (status === "completed") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "completed" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+  if (status === "failed") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "failed" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+  if (status === "rendering") return { step: 4 as StepId, maxStep: 4 as StepId, renderStatus: "rendering" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+  if (status === "script_pending" || status === "script_generating") return { step: 3 as StepId, maxStep: 3 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+  if (status === "product_pending") return { step: 2 as StepId, maxStep: 2 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+  if (status === "breaking_down") return { step: 1 as StepId, maxStep: 1 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: true }
+  return { step: 1 as StepId, maxStep: 1 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: false, breakdownLoading: false }
 }
 
 function getInitialSourceTab(sourceType?: string, sourceAssetId?: string) {
@@ -435,11 +458,81 @@ function getInitialSourceTab(sourceType?: string, sourceAssetId?: string) {
   return sourceAssetId ? "AIGC 爆款" : "市场爆款"
 }
 
+function createMockVideoVersions({
+  material,
+  projectName,
+  productName,
+  model,
+  resolution,
+  ratio,
+  duration,
+  language,
+  subtitles,
+}: {
+  material: BetaMaterial
+  projectName: string
+  productName: string
+  model: string
+  resolution: string
+  ratio: string
+  duration: number
+  language: string
+  subtitles: string
+}): VideoVersion[] {
+  return [
+    {
+      id: "v3",
+      note: "当前版本",
+      createdAt: "2026-07-23 14:26",
+      video: material.video,
+      poster: material.cover,
+      sourceTitle: material.title,
+      productName,
+      model,
+      resolution,
+      ratio,
+      duration,
+      language,
+      subtitles,
+    },
+    {
+      id: "v2",
+      note: projectName,
+      createdAt: "2026-07-23 13:18",
+      video: material.video,
+      poster: "/replicate-covers/black-training-jacket.png",
+      sourceTitle: material.title,
+      productName: `${productName}（口播优化版）`,
+      model,
+      resolution,
+      ratio,
+      duration,
+      language,
+      subtitles,
+    },
+    {
+      id: "v1",
+      note: projectName,
+      createdAt: "2026-07-22 18:42",
+      video: material.video,
+      poster: "/replicate-covers/sports-bra.jpg",
+      sourceTitle: material.title,
+      productName: `${productName}（初版）`,
+      model: "Seedance 1.1",
+      resolution: "720P",
+      ratio: "9:16",
+      duration: 20,
+      language: "英语",
+      subtitles: "无字幕",
+    },
+  ]
+}
+
 export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, sourceType, uploadedSourceName }: Props) {
   const startsFromAssistant = Boolean(sourceAssetId || (sourceType === "upload" && uploadedSourceName))
   const initial = useMemo(
     () => startsFromAssistant
-      ? { step: 2 as StepId, maxStep: 2 as StepId, renderStatus: "idle" as RenderStatus }
+      ? { step: 1 as StepId, maxStep: 1 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: true }
       : getInitialState(projectId),
     [projectId, startsFromAssistant],
   )
@@ -447,6 +540,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
   const defaultMaterial = WORKSPACE_MATERIALS.find((material) => material.id === sourceAssetId)
     ?? WORKSPACE_MATERIALS.find((material) => material.id === "aigc-003")
     ?? WORKSPACE_MATERIALS[0]
+  const initialDuration = Number(defaultMaterial.duration.split(":").pop()) || 20
 
   const [step, setStep] = useState<StepId>(initial.step)
   const [maxStep, setMaxStep] = useState<StepId>(initial.maxStep)
@@ -456,7 +550,8 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
   const [selectedMaterialId, setSelectedMaterialId] = useState(defaultMaterial.id)
   const [uploadedFile, setUploadedFile] = useState<string | null>(uploadedSourceName ?? null)
   const [busy, setBusy] = useState<"analysis" | "script" | null>(null)
-  const [breakdownLoading, setBreakdownLoading] = useState(initial.step === 2)
+  const [breakdownStarted, setBreakdownStarted] = useState(initial.breakdownStarted)
+  const [breakdownLoading, setBreakdownLoading] = useState(initial.breakdownLoading)
   const [productName, setProductName] = useState("FlexForm 高支撑运动内衣")
   const [brandName, setBrandName] = useState("FlexForm")
   const [productDescription, setProductDescription] = useState("适合中高强度训练的高支撑运动内衣，加宽肩带与包裹式下围减少晃动。")
@@ -468,12 +563,36 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
     () => DETECTED_PEOPLE.find((person) => person.is_host)?.id ?? DETECTED_PEOPLE[0].id,
   )
   const [digitalHuman, setDigitalHuman] = useState<DHItem | null>(null)
+  const [personReplacementMode, setPersonReplacementMode] = useState<PersonReplacementMode | null>(null)
   const [scripts, setScripts] = useState(SCRIPT_SCENES)
   const [model, setModel] = useState("Seedance 2.0")
   const [ratio, setRatio] = useState("9:16")
   const [resolution, setResolution] = useState("720P")
   const [language, setLanguage] = useState("英语")
   const [subtitles, setSubtitles] = useState("跟随原视频")
+  const initialProjectTitle = title || existingProject?.title || "运动内衣承托测试 · 新版本"
+  const [titleDraft, setTitleDraft] = useState(initialProjectTitle)
+  const [editingTitle, setEditingTitle] = useState(false)
+  const projectNamesSnapshot = useSyncExternalStore(
+    subscribeBetaProjectNames,
+    getBetaProjectNamesSnapshot,
+    getBetaProjectNamesServerSnapshot,
+  )
+  const [videoVersions, setVideoVersions] = useState<VideoVersion[]>(() => initial.renderStatus === "completed"
+    ? createMockVideoVersions({
+        material: defaultMaterial,
+        projectName: initialProjectTitle,
+        productName: "FlexForm 高支撑运动内衣",
+        model: "Seedance 2.0",
+        resolution: "720P",
+        ratio: "9:16",
+        duration: initialDuration,
+        language: "英语",
+        subtitles: "跟随原视频",
+      })
+    : [])
+  const [selectedVersionId, setSelectedVersionId] = useState(initial.renderStatus === "completed" ? "v3" : "")
+  const [pendingVersion, setPendingVersion] = useState<VideoVersion | null>(null)
 
   const selectedMaterial = sourceType === "upload" && uploadedSourceName
     ? {
@@ -488,80 +607,121 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
     : WORKSPACE_MATERIALS.find((material) => material.id === selectedMaterialId) ?? defaultMaterial
   const duration = Number(selectedMaterial.duration.split(":").pop()) || 20
   const estimatedCost = getEstimatedRenderCost(duration, resolution)
-  const resolvedTitle = title || existingProject?.title || "运动内衣承托测试 · 新版本"
+  const resolvedTitle = getBetaProjectName(projectId, projectNamesSnapshot) ?? initialProjectTitle
 
   useEffect(() => {
     if (renderStatus !== "rendering") return
     const timer = window.setInterval(() => {
-      setProgress((current) => {
-        const next = Math.min(100, current + 8)
-        if (next >= 100) {
-          window.clearInterval(timer)
-          window.setTimeout(() => setRenderStatus("completed"), 250)
-        }
-        return next
-      })
+      setProgress((current) => Math.min(100, current + 8))
     }, 260)
     return () => window.clearInterval(timer)
   }, [renderStatus])
 
   useEffect(() => {
-    if (step !== 2 || !breakdownLoading) return
+    if (renderStatus !== "rendering" || progress < 100) return
+    const timer = window.setTimeout(() => {
+      if (pendingVersion) {
+        setVideoVersions((currentVersions) => [
+          pendingVersion,
+          ...currentVersions.map((version) => version.note === "当前版本"
+            ? { ...version, note: resolvedTitle }
+            : version),
+        ])
+        setSelectedVersionId(pendingVersion.id)
+        setPendingVersion(null)
+      }
+      setRenderStatus("completed")
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [pendingVersion, progress, renderStatus, resolvedTitle])
+
+  useEffect(() => {
+    if (step !== 1 || !breakdownStarted || !breakdownLoading) return
     const timer = window.setTimeout(() => setBreakdownLoading(false), 2500)
     return () => window.clearTimeout(timer)
-  }, [breakdownLoading, step])
+  }, [breakdownLoading, breakdownStarted, step])
 
   const status = useMemo<BetaProjectStatus>(() => {
-    if (renderStatus === "rendering") return "rendering"
-    if (renderStatus === "completed") return "completed"
-    if (renderStatus === "failed") return "failed"
+    if (step === 4) {
+      if (renderStatus === "rendering") return "rendering"
+      if (renderStatus === "completed") return "completed"
+      if (renderStatus === "failed") return "failed"
+    }
     if (busy === "analysis") return "breaking_down"
     if (busy === "script") return "script_generating"
-    if (step === 1) return "draft"
-    if (step === 2) return "breaking_down"
-    if (step === 3) return "product_pending"
+    if (step === 1) return breakdownStarted ? "breaking_down" : "draft"
+    if (step === 2) return "product_pending"
     return "script_pending"
-  }, [busy, renderStatus, step])
-  const statusMeta = step === 2 && breakdownLoading
+  }, [breakdownStarted, busy, renderStatus, step])
+  const statusMeta = step === 1 && breakdownStarted && breakdownLoading
     ? { label: "拆解中", tone: "#2563eb" }
     : STATUS_META[status]
 
   function goToStep(next: StepId) {
     if (next <= maxStep) {
-      if (next === 2 && step !== 2) setBreakdownLoading(true)
       setStep(next)
-      if (renderStatus !== "idle") setRenderStatus("idle")
     }
   }
 
   function runAnalysis() {
+    setBreakdownStarted(true)
+    setBreakdownLoading(true)
     setBusy("analysis")
-    window.setTimeout(() => {
-      setBusy(null)
-      setBreakdownLoading(true)
-      setStep(2)
-      setMaxStep((current) => Math.max(current, 2) as StepId)
-    }, 900)
+    window.setTimeout(() => setBusy(null), 900)
   }
 
   function confirmBreakdown() {
-    setStep(3)
-    setMaxStep((current) => Math.max(current, 3) as StepId)
+    setStep(2)
+    setMaxStep((current) => Math.max(current, 2) as StepId)
   }
 
   function generateScript() {
     setBusy("script")
     window.setTimeout(() => {
       setBusy(null)
-      setStep(4)
-      setMaxStep(4)
+      setStep(3)
+      setMaxStep((current) => Math.max(current, 3) as StepId)
     }, 900)
   }
 
   function startRender() {
     if (AVAILABLE_CREDITS < estimatedCost) return
+    const nextVersionId = `v${videoVersions.length + 1}`
+    setSelectedVersionId(nextVersionId)
+    setPendingVersion({
+      id: nextVersionId,
+      note: "当前版本",
+      createdAt: "2026-08-17 刚刚",
+      video: selectedMaterial.video,
+      poster: selectedMaterial.cover,
+      sourceTitle: selectedMaterial.title,
+      productName,
+      model,
+      resolution,
+      ratio,
+      duration,
+      language,
+      subtitles,
+    })
+    setStep(4)
+    setMaxStep(4)
     setProgress(4)
     setRenderStatus("rendering")
+  }
+
+  function editCompletedResult() {
+    setStep(3)
+    setMaxStep(4)
+  }
+
+  function commitProjectTitle() {
+    const nextTitle = titleDraft.trim()
+    if (nextTitle) {
+      saveBetaProjectName(projectId, nextTitle)
+    } else {
+      setTitleDraft(resolvedTitle)
+    }
+    setEditingTitle(false)
   }
 
   return (
@@ -573,16 +733,41 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
               <ArrowLeft size={15} />
             </Link>
             <div className="min-w-0">
-              <h1 className="truncate text-[14px] font-extrabold text-[#202229]">{resolvedTitle}</h1>
+              {editingTitle ? (
+                <div className="flex min-w-0 items-center gap-1">
+                  <input
+                    autoFocus
+                    value={titleDraft}
+                    onChange={(event) => setTitleDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") commitProjectTitle()
+                      if (event.key === "Escape") {
+                        setTitleDraft(resolvedTitle)
+                        setEditingTitle(false)
+                      }
+                    }}
+                    className="h-7 min-w-[220px] max-w-[520px] rounded-md border border-[#7f9d26] px-2 text-[13px] font-extrabold text-[#202229] outline-none"
+                  />
+                  <button type="button" title="保存项目名称" aria-label="保存项目名称" onClick={commitProjectTitle} className="flex h-7 w-7 items-center justify-center rounded-md text-[#66830f] hover:bg-[#f0f8d5]"><Check size={13} /></button>
+                  <button type="button" title="取消修改" aria-label="取消修改" onClick={() => { setTitleDraft(resolvedTitle); setEditingTitle(false) }} className="flex h-7 w-7 items-center justify-center rounded-md text-[#8e929a] hover:bg-[#f2f3f5]"><X size={13} /></button>
+                </div>
+              ) : (
+                <div className="flex min-w-0 items-center gap-1">
+                  <h1 className="truncate text-[14px] font-extrabold text-[#202229]">{resolvedTitle}</h1>
+                  <button type="button" title="修改项目名称" aria-label="修改项目名称" onClick={() => { setTitleDraft(resolvedTitle); setEditingTitle(true) }} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8e929a] hover:bg-[#f2f3f5] hover:text-[#34373d]"><Pencil size={13} /></button>
+                </div>
+              )}
               <p className="mt-0.5 flex items-center gap-1 text-[10px] text-[#9699a1]"><Clock3 size={10} />已自动保存</p>
             </div>
           </div>
-          <span
-            className="shrink-0 rounded px-2.5 py-1.5 text-[11px] font-extrabold"
-            style={{ color: statusMeta.tone, backgroundColor: `${statusMeta.tone}12` }}
-          >
-            {statusMeta.label}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span
+              className="rounded px-2.5 py-1.5 text-[11px] font-extrabold"
+              style={{ color: statusMeta.tone, backgroundColor: `${statusMeta.tone}12` }}
+            >
+              {statusMeta.label}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -595,70 +780,66 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1440px] px-5 py-6">
-          {renderStatus === "rendering" && <RenderingView progress={progress} material={selectedMaterial} />}
-          {renderStatus === "completed" && (
+          {step === 4 && renderStatus === "rendering" && videoVersions.length === 0 && <RenderingView progress={progress} material={selectedMaterial} />}
+          {step === 4 && (renderStatus === "completed" || (renderStatus === "rendering" && videoVersions.length > 0)) && (
             <ResultView
-              material={selectedMaterial}
               projectName={resolvedTitle}
-              productName={productName}
-              model={model}
-              resolution={resolution}
-              ratio={ratio}
-              duration={duration}
-              language={language}
-              subtitles={subtitles}
-              onRegenerate={() => setRenderStatus("idle")}
-              onEdit={() => setRenderStatus("idle")}
+              versions={videoVersions}
+              selectedVersionId={selectedVersionId}
+              renderingVersion={renderStatus === "rendering" ? pendingVersion : null}
+              renderProgress={progress}
+              onSelectVersion={setSelectedVersionId}
+              onRegenerate={editCompletedResult}
+              onEdit={editCompletedResult}
             />
           )}
-          {renderStatus === "failed" && <FailedView onRetry={startRender} />}
-          {renderStatus === "idle" && (
-            <>
-              {step === 1 && (
-                <SourceStep
-                  sourceTab={sourceTab}
-                  onSourceTab={setSourceTab}
-                  selectedMaterialId={selectedMaterialId}
-                  onSelectMaterial={setSelectedMaterialId}
-                  uploadedFile={uploadedFile}
-                  onUploadedFile={setUploadedFile}
-                />
-              )}
-              {step === 2 && <BreakdownStep material={selectedMaterial} loading={breakdownLoading} />}
-              {step === 3 && (
-                <ProductStep
-                  material={selectedMaterial}
-                  productName={productName}
-                  onProductName={setProductName}
-                  brandName={brandName}
-                  onBrandName={setBrandName}
-                  description={productDescription}
-                  onDescription={setProductDescription}
-                  sellingPoints={sellingPoints}
-                  onSellingPoints={setSellingPoints}
-                  selectedTargetProductId={selectedTargetProductId}
-                  onTargetProduct={setSelectedTargetProductId}
-                  selectedSourcePersonId={selectedSourcePersonId}
-                  onSourcePerson={setSelectedSourcePersonId}
-                  digitalHuman={digitalHuman}
-                  onDigitalHuman={setDigitalHuman}
-                />
-              )}
-              {step === 4 && (
-                <ScriptStep
-                  scripts={scripts}
-                  onScripts={setScripts}
-                />
-              )}
-            </>
+          {step === 4 && renderStatus === "failed" && <FailedView onRetry={startRender} />}
+          {step === 1 && !breakdownStarted && (
+            <SourceStep
+              sourceTab={sourceTab}
+              onSourceTab={setSourceTab}
+              selectedMaterialId={selectedMaterialId}
+              onSelectMaterial={setSelectedMaterialId}
+              uploadedFile={uploadedFile}
+              onUploadedFile={setUploadedFile}
+            />
+          )}
+          {step === 1 && breakdownStarted && <BreakdownStep material={selectedMaterial} loading={breakdownLoading} />}
+          {step === 2 && (
+            <ProductStep
+              material={selectedMaterial}
+              productName={productName}
+              onProductName={setProductName}
+              brandName={brandName}
+              onBrandName={setBrandName}
+              description={productDescription}
+              onDescription={setProductDescription}
+              sellingPoints={sellingPoints}
+              onSellingPoints={setSellingPoints}
+              selectedTargetProductId={selectedTargetProductId}
+              onTargetProduct={setSelectedTargetProductId}
+              selectedSourcePersonId={selectedSourcePersonId}
+              onSourcePerson={setSelectedSourcePersonId}
+              digitalHuman={digitalHuman}
+              onDigitalHuman={setDigitalHuman}
+              personReplacementMode={personReplacementMode}
+              onPersonReplacementMode={setPersonReplacementMode}
+            />
+          )}
+          {step === 3 && (
+            <ScriptStep
+              scripts={scripts}
+              onScripts={setScripts}
+            />
           )}
         </div>
       </div>
 
-      {renderStatus === "idle" && (
+      {step < 4 && renderStatus !== "rendering" && (
         <WorkspaceFooter
           step={step}
-          busy={busy ?? (step === 2 && breakdownLoading ? "analysis" : null)}
+          breakdownStarted={breakdownStarted}
+          busy={busy ?? (step === 1 && breakdownStarted && breakdownLoading ? "analysis" : null)}
           language={language}
           onLanguage={setLanguage}
           model={model}
@@ -670,11 +851,12 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
           duration={duration}
           availableCredits={AVAILABLE_CREDITS}
           estimatedCost={estimatedCost}
+          hasVideoVersions={videoVersions.length > 0}
           subtitles={subtitles}
           onSubtitles={setSubtitles}
           onRegenerateScript={generateScript}
           onBack={() => step === 1 ? undefined : goToStep((step - 1) as StepId)}
-          onNext={step === 1 ? runAnalysis : step === 2 ? confirmBreakdown : step === 3 ? generateScript : startRender}
+          onNext={step === 1 ? (breakdownStarted ? confirmBreakdown : runAnalysis) : step === 2 ? generateScript : startRender}
         />
       )}
     </main>
@@ -696,8 +878,8 @@ function StepNavigation({
     <nav className="border-b border-[var(--line)] bg-white px-5" aria-label="高保真复刻步骤">
       <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center">
         {STEPS.map((item, index) => {
-          const complete = maxStep > item.id || (item.id === 4 && finalStepComplete)
-          const current = step === item.id && !complete
+          const current = step === item.id
+          const complete = !current && (maxStep > item.id || (item.id === 4 && finalStepComplete))
           const enabled = item.id <= maxStep
           return (
             <div key={item.id} className="flex min-w-0 flex-1 items-center">
@@ -1132,7 +1314,7 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
     pendingSeek.current = null
   }
 
-  if (loading) return <BreakdownSkeleton />
+  if (loading) return <BreakdownSkeleton material={material} />
 
   return (
     <section className="text-[#152238]">
@@ -1335,24 +1517,37 @@ function BreakdownStep({ material, loading }: { material: BetaMaterial; loading:
   )
 }
 
-function BreakdownSkeleton() {
+function BreakdownSkeleton({ material }: { material: BetaMaterial }) {
   return (
     <section aria-busy="true" aria-label="拆解结果加载中">
-      <StepHeader title="正在拆解爆款视频" description="正在识别创意策略、叙事结构、商品和人物信息，请稍候…" />
+      <StepHeader title="正在拆解爆款视频" description="正在识别创意策略、叙事结构、商品、人物和环境信息，请稍候…" />
       <div className="mt-5 grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="space-y-4 animate-pulse">
-          <div className="aspect-[9/16] max-h-[560px] w-full rounded-lg bg-[#e5e7eb]" />
-          <div className="grid grid-cols-4 gap-px overflow-hidden rounded-md border border-[var(--line)] bg-[#e2e4e7]">
+        <aside className="space-y-4">
+          <div className="overflow-hidden rounded-lg bg-black">
+            <video
+              suppressHydrationWarning
+              src={material.video}
+              poster={material.cover}
+              controls
+              muted
+              playsInline
+              preload="metadata"
+              aria-label={`选中的视频：${material.title}`}
+              className="aspect-[9/16] max-h-[560px] w-full object-contain"
+            />
+          </div>
+          <p className="truncate text-[12px] font-bold text-[#25324a]">{material.title}</p>
+          <div className="grid animate-pulse grid-cols-4 gap-px overflow-hidden rounded-md border border-[var(--line)] bg-[#e2e4e7]">
             {Array.from({ length: 4 }, (_, index) => (
               <span key={index} className="h-12 bg-[#eef0f2]" />
             ))}
           </div>
         </aside>
 
-        <div className="space-y-5 animate-pulse">
+        <div className="space-y-5 text-[#152238]">
           <section className="border-b border-[var(--line)] pb-5">
-            <div className="h-4 w-24 rounded bg-[#dfe2e5]" />
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <h3 className="text-[14px] font-extrabold">策略摘要</h3>
+            <div className="mt-4 grid animate-pulse gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, index) => (
                 <div key={index} className="space-y-2">
                   <div className="h-2.5 w-16 rounded bg-[#e3e5e8]" />
@@ -1364,10 +1559,10 @@ function BreakdownSkeleton() {
 
           <section>
             <div className="flex items-center justify-between">
-              <div className="h-4 w-24 rounded bg-[#dfe2e5]" />
-              <div className="h-3 w-40 rounded bg-[#e5e7e9]" />
+              <h3 className="text-[14px] font-extrabold">叙事结构</h3>
+              <span className="text-[11px] font-bold text-[#98a2b3]">正在识别阶段与分镜</span>
             </div>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 animate-pulse space-y-2">
               {Array.from({ length: 4 }, (_, index) => (
                 <div key={index} className="flex h-[70px] items-center gap-3 rounded-lg border border-[var(--line)] bg-white p-3">
                   <div className="h-7 w-28 shrink-0 rounded bg-[#e7e9eb]" />
@@ -1381,10 +1576,10 @@ function BreakdownSkeleton() {
           </section>
 
           <section className="grid gap-5 border-t border-[var(--line)] pt-5 md:grid-cols-2">
-            {Array.from({ length: 2 }, (_, columnIndex) => (
-              <div key={columnIndex}>
-                <div className="h-4 w-24 rounded bg-[#dfe2e5]" />
-                <div className="mt-3 space-y-2">
+            {["商品信息", "人物信息"].map((heading) => (
+              <div key={heading}>
+                <h3 className="text-[14px] font-extrabold">{heading}</h3>
+                <div className="mt-3 animate-pulse space-y-2">
                   {Array.from({ length: 2 }, (_, itemIndex) => (
                     <div key={itemIndex} className="h-[68px] rounded-lg border border-[var(--line)] bg-white" />
                   ))}
@@ -1393,8 +1588,8 @@ function BreakdownSkeleton() {
             ))}
           </section>
           <section className="border-t border-[var(--line)] pt-5">
-            <div className="h-4 w-24 rounded bg-[#dfe2e5]" />
-            <div className="mt-3 h-[68px] rounded-lg border border-[var(--line)] bg-white" />
+            <h3 className="text-[14px] font-extrabold">环境信息</h3>
+            <div className="mt-3 h-[68px] animate-pulse rounded-lg border border-[var(--line)] bg-white" />
           </section>
         </div>
       </div>
@@ -1418,6 +1613,8 @@ function ProductStep({
   onSourcePerson,
   digitalHuman,
   onDigitalHuman,
+  personReplacementMode,
+  onPersonReplacementMode,
 }: {
   material: BetaMaterial
   productName: string
@@ -1434,6 +1631,8 @@ function ProductStep({
   onSourcePerson: (value: string) => void
   digitalHuman: DHItem | null
   onDigitalHuman: (value: DHItem | null) => void
+  personReplacementMode: PersonReplacementMode | null
+  onPersonReplacementMode: (value: PersonReplacementMode | null) => void
 }) {
   const selectedTargetProduct = DETECTED_PRODUCTS.find((product) => product.id === selectedTargetProductId) ?? DETECTED_PRODUCTS[0]
   const selectedSourcePerson = DETECTED_PEOPLE.find((person) => person.id === selectedSourcePersonId) ?? DETECTED_PEOPLE[0]
@@ -1522,6 +1721,21 @@ function ProductStep({
     setProductImages([libraryImage])
     setActiveProductImageId(libraryImage.id)
     setProductPickerOpen(false)
+  }
+
+  function selectDigitalHuman(value: DHItem) {
+    onDigitalHuman(value)
+    onPersonReplacementMode("digital-human")
+  }
+
+  function removeDigitalHuman() {
+    onDigitalHuman(null)
+    onPersonReplacementMode(null)
+  }
+
+  function selectAutoGeneratedPerson() {
+    onDigitalHuman(null)
+    onPersonReplacementMode("auto")
   }
 
   return (
@@ -1834,15 +2048,22 @@ function ProductStep({
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <h3 className="text-[14px] font-extrabold text-[#292c32]">新人物模特</h3>
-              <p className="mt-1 text-[11px] text-[#92959d]">从创意助手数字人库选择本次视频模特。</p>
+              <p className="mt-1 text-[11px] text-[#92959d]">选择数字人，或保留原视频人物由 AI 自动生成。</p>
             </div>
-            {digitalHuman && (
+            {personReplacementMode && (
               <span className="rounded bg-[#f1f2f4] px-2 py-1 text-[10px] font-bold text-[#666a72]">
-                已选择：{digitalHuman.name}
+                已选择：{personReplacementMode === "auto" ? "AI 自动生成" : digitalHuman?.name}
               </span>
             )}
           </div>
-          <div className="mt-3 flex items-center gap-3 rounded-lg border border-[var(--line)] bg-white p-3">
+          <div
+            className={cn(
+              "relative mt-3 flex items-center gap-3 rounded-lg border bg-white p-3 transition",
+              personReplacementMode === "digital-human"
+                ? "border-[#96b733] bg-[#fbfff1] ring-2 ring-[#dff49d]"
+                : "border-[var(--line)]",
+            )}
+          >
             {digitalHuman ? (
               <div className="relative h-10 w-10 shrink-0">
                 <button
@@ -1856,7 +2077,7 @@ function ProductStep({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onDigitalHuman(null)}
+                  onClick={removeDigitalHuman}
                   aria-label="移除数字人"
                   className="absolute -right-1.5 -top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-[#18181b] text-white shadow-sm hover:bg-[#444]"
                 >
@@ -1881,13 +2102,43 @@ function ProductStep({
                 {digitalHuman ? "点击头像可重新选择数字人" : "点击图标打开创意助手数字人选择器"}
               </p>
             </div>
+            {personReplacementMode === "digital-human" && (
+              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#c9ff29] text-[#334008]">
+                <Check size={11} strokeWidth={3} />
+              </span>
+            )}
           </div>
+          <button
+            type="button"
+            aria-label="不替换人物，AI 自动生成"
+            aria-pressed={personReplacementMode === "auto"}
+            onClick={selectAutoGeneratedPerson}
+            className={cn(
+              "relative mt-3 flex w-full items-center gap-3 rounded-lg border bg-white p-3 text-left transition",
+              personReplacementMode === "auto"
+                ? "border-[#96b733] bg-[#fbfff1] ring-2 ring-[#dff49d]"
+                : "border-[var(--line)] hover:border-[#b9bdc4] hover:bg-[#fafafa]",
+            )}
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-dashed border-[var(--line-strong)] bg-white/60 text-[var(--muted)]">
+              <WandSparkles size={16} strokeWidth={2} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[11.5px] font-extrabold text-[#30333a]">不替换，AI 自动生成</span>
+              <span className="mt-0.5 block text-[10.5px] leading-4 text-[#92959d]">保留原视频人物，无需选择数字人</span>
+            </span>
+            {personReplacementMode === "auto" && (
+              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#c9ff29] text-[#334008]">
+                <Check size={11} strokeWidth={3} />
+              </span>
+            )}
+          </button>
         </aside>
       </div>
       <DigitalHumanModal
         open={dhModalOpen}
         onOpenChange={setDhModalOpen}
-        onConfirm={onDigitalHuman}
+        onConfirm={selectDigitalHuman}
       />
     </section>
     <ProductPickerDialog open={productPickerOpen} onOpenChange={setProductPickerOpen} onSelect={selectLibraryProduct} />
@@ -2090,6 +2341,7 @@ function ScriptStep({
     </section>
   )
 }
+
 function RenderingView({ progress, material }: { progress: number; material: BetaMaterial }) {
   const stages = [
     { label: "锁定脚本与商品版本", threshold: 10 },
@@ -2129,94 +2381,67 @@ function RenderingView({ progress, material }: { progress: number; material: Bet
 }
 
 function ResultView({
-  material,
   projectName,
-  productName,
-  model,
-  resolution,
-  ratio,
-  duration,
-  language,
-  subtitles,
+  versions,
+  selectedVersionId,
+  renderingVersion,
+  renderProgress,
+  onSelectVersion,
   onRegenerate,
   onEdit,
 }: {
-  material: BetaMaterial
   projectName: string
-  productName: string
-  model: string
-  resolution: string
-  ratio: string
-  duration: number
-  language: string
-  subtitles: string
+  versions: VideoVersion[]
+  selectedVersionId: string
+  renderingVersion: VideoVersion | null
+  renderProgress: number
+  onSelectVersion: (versionId: string) => void
   onRegenerate: () => void
   onEdit: () => void
 }) {
-  const [selectedVersionId, setSelectedVersionId] = useState("v3")
-  const versions = [
-    {
-      id: "v3",
-      note: "当前版本",
-      createdAt: "2026-07-23 14:26",
-      video: material.video,
-      poster: material.cover,
-      sourceTitle: material.title,
-      productName,
-      model,
-      resolution,
-      ratio,
-      duration,
-      language,
-      subtitles,
-    },
-    {
-      id: "v2",
-      note: projectName,
-      createdAt: "2026-07-23 13:18",
-      video: material.video,
-      poster: "/replicate-covers/black-training-jacket.png",
-      sourceTitle: material.title,
-      productName: `${productName}（口播优化版）`,
-      model,
-      resolution,
-      ratio,
-      duration,
-      language,
-      subtitles,
-    },
-    {
-      id: "v1",
-      note: projectName,
-      createdAt: "2026-07-22 18:42",
-      video: material.video,
-      poster: "/replicate-covers/sports-bra.jpg",
-      sourceTitle: material.title,
-      productName: `${productName}（初版）`,
-      model: "Seedance 1.1",
-      resolution: "720P",
-      ratio: "9:16",
-      duration: 20,
-      language: "英语",
-      subtitles: "无字幕",
-    },
-  ]
-  const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? versions[0]
+  const selectedVersion = renderingVersion && renderingVersion.id === selectedVersionId
+    ? renderingVersion
+    : versions.find((version) => version.id === selectedVersionId) ?? versions[0]
+  if (!selectedVersion) return null
+  const viewingRenderingVersion = renderingVersion?.id === selectedVersion.id
 
   return (
     <section>
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <StepHeader title="视频已生成" description="可查看结果、下载视频，或返回重新迭代。" />
+        <StepHeader
+          title={renderingVersion ? "新版本生成中" : "视频已生成"}
+          description={renderingVersion ? "新版本正在后台生成，可以继续切换和查看历史视频。" : "可查看结果、下载视频，或返回重新迭代。"}
+        />
         <div className="flex gap-2">
-          <button type="button" onClick={onEdit} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 text-[11.5px] font-bold text-[#5f636c]"><ArrowLeft size={13} />返回修改脚本</button>
-          <button type="button" onClick={onRegenerate} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 text-[11.5px] font-bold text-[#5f636c]"><RefreshCw size={13} />再次生成</button>
-          <a href={selectedVersion.video} download className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#17181c] px-4 text-[11.5px] font-extrabold text-white"><Download size={13} />下载 MP4</a>
+          {!renderingVersion && <button type="button" onClick={onEdit} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 text-[11.5px] font-bold text-[#5f636c]"><ArrowLeft size={13} />返回修改脚本</button>}
+          {!renderingVersion && <button type="button" onClick={onRegenerate} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 text-[11.5px] font-bold text-[#5f636c]"><RefreshCw size={13} />再次生成</button>}
+          {viewingRenderingVersion ? (
+            <span aria-label="当前视频生成中" className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#e8edf2] px-4 text-[11.5px] font-extrabold text-[#78818c]"><LoaderCircle size={13} className="animate-spin" />生成中</span>
+          ) : (
+            <a href={selectedVersion.video} download className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#17181c] px-4 text-[11.5px] font-extrabold text-white"><Download size={13} />下载 MP4</a>
+          )}
         </div>
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[430px_minmax(0,1fr)]">
         <div className="overflow-hidden rounded-lg bg-black">
-          <video key={selectedVersion.id} suppressHydrationWarning src={selectedVersion.video} poster={selectedVersion.poster} controls playsInline preload="metadata" className="aspect-[9/16] max-h-[680px] w-full object-contain" />
+          {viewingRenderingVersion ? (
+            <div role="status" aria-label={`${selectedVersion.id} 视频生成中`} className="relative aspect-[9/16] max-h-[680px] w-full overflow-hidden">
+              <Image src={selectedVersion.poster} alt="生成中视频封面" fill sizes="430px" priority className="object-cover opacity-30 blur-[1px]" />
+              <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.28),rgba(7,10,15,0.88))]" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/30 shadow-[0_12px_36px_rgba(0,0,0,0.35)] backdrop-blur-sm"><LoaderCircle size={28} className="animate-spin text-[#c9ff29]" /></span>
+                <strong className="mt-5 text-[20px] font-extrabold tracking-[0.12em]">生成中</strong>
+                <span className="mt-2 text-[12px] font-bold tabular-nums text-white/65">{renderProgress}%</span>
+                <span className="mt-5 h-1.5 w-36 overflow-hidden rounded-full bg-white/15">
+                  <span className="block h-full rounded-full bg-[#c9ff29] transition-[width] duration-300" style={{ width: `${renderProgress}%` }} />
+                </span>
+                <span className="mt-3 text-[10.5px] text-white/45">新版本渲染完成后可播放</span>
+              </div>
+            </div>
+          ) : (
+            <video key={selectedVersion.id} suppressHydrationWarning src={selectedVersion.video} poster={selectedVersion.poster} controls playsInline preload="metadata" className="aspect-[9/16] max-h-[680px] w-full object-contain" />
+          )}
         </div>
         <div>
           <section className="border-b border-[var(--line)] pb-5">
@@ -2236,6 +2461,34 @@ function ResultView({
               <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--line)] px-3 text-[11px] font-bold text-[#62666f]"><Copy size={12} />复制为新项目</button>
             </div>
             <div className="mt-3 divide-y divide-[var(--line)] border-y border-[var(--line)]">
+              {renderingVersion && (
+                <button
+                  type="button"
+                  aria-label={`查看 ${renderingVersion.id} 生成中版本`}
+                  aria-pressed={viewingRenderingVersion}
+                  onClick={() => onSelectVersion(renderingVersion.id)}
+                  className={cn(
+                    "relative flex w-full items-center justify-between overflow-hidden px-3 py-3.5 text-left transition-colors",
+                    viewingRenderingVersion ? "bg-[#f7fce9] shadow-[inset_3px_0_0_#9dc42d]" : "bg-[#fbfcf8] hover:bg-[#f7fce9]",
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e9f9b7] text-[#5e7b14]"><LoaderCircle size={14} className="animate-spin" /></span>
+                    <div>
+                      <p className="text-[12px] font-extrabold text-[#536b16]">{renderingVersion.id}</p>
+                      <p className="mt-0.5 text-[10.5px] text-[#7b8b55]">新版本正在生成</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {viewingRenderingVersion && <span className="rounded-full bg-white px-2 py-1 text-[9.5px] font-extrabold text-[#536b16] shadow-sm">当前查看</span>}
+                    <span className="rounded-full bg-[#e9f9b7] px-2.5 py-1 text-[9.5px] font-extrabold tabular-nums text-[#536b16]">生成中 {renderProgress}%</span>
+                    <span className="text-[10.5px] text-[#8c986f]">预计约 1 分钟</span>
+                  </div>
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#e3ebcd]">
+                    <span className="block h-full bg-[#9dc42d] transition-[width] duration-300" style={{ width: `${renderProgress}%` }} />
+                  </span>
+                </button>
+              )}
               {versions.map((version) => {
                 const selected = selectedVersion.id === version.id
                 return (
@@ -2244,7 +2497,7 @@ function ResultView({
                     type="button"
                     aria-label={`查看 ${version.id} 版本`}
                     aria-pressed={selected}
-                    onClick={() => setSelectedVersionId(version.id)}
+                    onClick={() => onSelectVersion(version.id)}
                     className={cn(
                       "flex w-full items-center justify-between px-3 py-3 text-left transition-colors",
                       selected ? "bg-[#f7fce9] shadow-[inset_3px_0_0_#b7eb22]" : "hover:bg-[#fafafa]",
@@ -2283,6 +2536,7 @@ function FailedView({ onRetry }: { onRetry: () => void }) {
 
 function WorkspaceFooter({
   step,
+  breakdownStarted,
   busy,
   language,
   onLanguage,
@@ -2295,6 +2549,7 @@ function WorkspaceFooter({
   duration,
   availableCredits,
   estimatedCost,
+  hasVideoVersions,
   subtitles,
   onSubtitles,
   onRegenerateScript,
@@ -2302,6 +2557,7 @@ function WorkspaceFooter({
   onNext,
 }: {
   step: StepId
+  breakdownStarted: boolean
   busy: "analysis" | "script" | null
   language: string
   onLanguage: (value: string) => void
@@ -2314,6 +2570,7 @@ function WorkspaceFooter({
   duration: number
   availableCredits: number
   estimatedCost: number
+  hasVideoVersions: boolean
   subtitles: string
   onSubtitles: (value: string) => void
   onRegenerateScript: () => void
@@ -2321,14 +2578,14 @@ function WorkspaceFooter({
   onNext: () => void
 }) {
   const labels: Record<StepId, string> = {
-    1: "拆解分析此视频",
-    2: "立即复刻",
-    3: "生成新脚本",
-    4: "生成视频",
+    1: breakdownStarted ? "立即复刻" : "拆解分析此视频",
+    2: "生成新脚本",
+    3: hasVideoVersions ? "生成新版本" : "生成视频",
+    4: "视频生成",
   }
   const [activeConfigPopup, setActiveConfigPopup] = useState<"model" | "subtitles" | "settings" | null>(null)
   const footerConfigRef = useRef<HTMLDivElement>(null)
-  const insufficientCredits = step === 4 && availableCredits < estimatedCost
+  const insufficientCredits = step === 3 && availableCredits < estimatedCost
 
   useEffect(() => {
     if (!activeConfigPopup) return
@@ -2353,14 +2610,14 @@ function WorkspaceFooter({
         ) : (
           <Link href="/replicate" className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-[12px] font-bold text-[#686c75] hover:bg-[#f3f4f6]"><ArrowLeft size={13} />返回项目列表</Link>
         )}
-        {step === 2 && (
+        {step === 1 && breakdownStarted && (
           <div className="ml-auto flex min-w-0 items-center gap-4 overflow-hidden whitespace-nowrap text-[11px] text-[#646953]">
             <span className="flex shrink-0 items-center gap-1.5 font-extrabold text-[#333820]"><ScanSearch size={14} />复刻边界</span>
             <span className="truncate"><strong className="text-[#3e4333]">保留：</strong>创意策略、叙事结构</span>
             <span className="truncate"><strong className="text-[#3e4333]">替换：</strong>商品信息、人物，适配新产品卖点、口播</span>
           </div>
         )}
-        {step === 3 && (
+        {step === 2 && (
           <label className="ml-auto flex items-center gap-2">
             <span className="text-right">
               <span className="block text-[11px] font-extrabold text-[#3d4148]">口播语言</span>
@@ -2378,7 +2635,7 @@ function WorkspaceFooter({
             </span>
           </label>
         )}
-        {step === 4 && (
+        {step === 3 && (
           <div ref={footerConfigRef} className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 whitespace-nowrap py-0.5">
             <button
               type="button"
@@ -2562,10 +2819,10 @@ function WorkspaceFooter({
           className={cn(
             "inline-flex h-10 shrink-0 items-center gap-2 rounded-md bg-[#17181c] px-4 text-[12.5px] font-extrabold text-white hover:bg-[#303238] disabled:opacity-60",
             busy !== null ? "disabled:cursor-wait" : "disabled:cursor-not-allowed",
-            step === 1 && "ml-auto",
+            step === 1 && !breakdownStarted && "ml-auto",
           )}
         >
-          {busy ? <LoaderCircle size={14} className="animate-spin" /> : step === 4 ? <WandSparkles size={14} /> : <ArrowRight size={14} />}
+          {busy ? <LoaderCircle size={14} className="animate-spin" /> : step === 3 ? <WandSparkles size={14} /> : <ArrowRight size={14} />}
           {busy === "analysis" ? "正在拆解视频" : busy === "script" ? "正在生成脚本" : insufficientCredits ? "积分不足" : labels[step]}
         </button>
       </div>

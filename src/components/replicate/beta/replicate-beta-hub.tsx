@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, useSyncExternalStore } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -8,13 +8,14 @@ import * as Dialog from "@radix-ui/react-dialog"
 import {
   ArrowRight,
   CalendarDays,
+  Check,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Copy,
   Film,
   FolderKanban,
-
+  Pencil,
   Plus,
   RotateCcw,
   Search,
@@ -23,6 +24,13 @@ import {
   X,
 } from "lucide-react"
 import { BETA_PROJECTS, STATUS_META, type BetaProject, type BetaProjectStatus } from "@/lib/replicate/beta-mock"
+import {
+  getBetaProjectName,
+  getBetaProjectNamesServerSnapshot,
+  getBetaProjectNamesSnapshot,
+  saveBetaProjectName,
+  subscribeBetaProjectNames,
+} from "@/lib/replicate/beta-project-names"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "in_progress" | BetaProjectStatus
@@ -48,6 +56,15 @@ export function ReplicateBetaHub() {
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
+  const projectNamesSnapshot = useSyncExternalStore(
+    subscribeBetaProjectNames,
+    getBetaProjectNamesSnapshot,
+    getBetaProjectNamesServerSnapshot,
+  )
+  const namedProjects = useMemo(() => projects.map((project) => ({
+      ...project,
+      title: getBetaProjectName(project.id, projectNamesSnapshot) ?? project.title,
+    })), [projectNamesSnapshot, projects])
 
   function openDatePicker() {
     const input = dateInputRef.current
@@ -63,7 +80,7 @@ export function ReplicateBetaHub() {
 
   const visibleProjects = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    return projects.filter((project) => {
+    return namedProjects.filter((project) => {
       const statusMatches = filter === "all"
         || (filter === "in_progress" && !["completed", "failed"].includes(project.status))
         || project.status === filter
@@ -72,7 +89,7 @@ export function ReplicateBetaHub() {
       const createdMatches = !createdDate || project.createdAt === createdDate
       return statusMatches && createdMatches && queryMatches
     })
-  }, [createdDate, filter, projects, query])
+  }, [createdDate, filter, namedProjects, query])
 
   const totalPages = Math.max(1, Math.ceil(visibleProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -98,6 +115,10 @@ export function ReplicateBetaHub() {
 
   function deleteProject(id: string) {
     setProjects((current) => current.filter((project) => project.id !== id))
+  }
+
+  function renameProject(id: string, title: string) {
+    saveBetaProjectName(id, title)
   }
 
   return (
@@ -227,6 +248,7 @@ export function ReplicateBetaHub() {
                     project={project}
                     onDuplicate={() => duplicateProject(project)}
                     onDelete={() => deleteProject(project.id)}
+                    onRename={(title) => renameProject(project.id, title)}
                   />
                 ))}
               </div>
@@ -315,13 +337,24 @@ function ProjectCard({
   project,
   onDuplicate,
   onDelete,
+  onRename,
 }: {
   project: BetaProject
   onDuplicate: () => void
   onDelete: () => void
+  onRename: (title: string) => void
 }) {
   const status = STATUS_META[project.status]
   const href = `/replicate/${project.id}`
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(project.title)
+
+  function commitRename() {
+    const nextTitle = draft.trim()
+    if (nextTitle && nextTitle !== project.title) onRename(nextTitle)
+    else setDraft(project.title)
+    setEditing(false)
+  }
 
   return (
     <article className="group overflow-hidden rounded-lg border border-[var(--line)] bg-white transition hover:border-[#c7c9cf] hover:shadow-[0_10px_28px_rgba(24,24,27,0.08)]">
@@ -338,7 +371,30 @@ function ProjectCard({
       <div className="p-4">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
-            <Link href={href} className="block truncate text-[14px] font-extrabold text-[#202229] hover:underline">{project.title}</Link>
+            {editing ? (
+              <div className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") commitRename()
+                    if (event.key === "Escape") {
+                      setDraft(project.title)
+                      setEditing(false)
+                    }
+                  }}
+                  className="h-7 min-w-0 flex-1 rounded-md border border-[#7f9d26] px-2 text-[13px] font-extrabold text-[#202229] outline-none"
+                />
+                <ToolButton label="保存项目名称" onClick={commitRename}><Check size={13} /></ToolButton>
+                <ToolButton label="取消修改" onClick={() => { setDraft(project.title); setEditing(false) }}><X size={13} /></ToolButton>
+              </div>
+            ) : (
+              <div className="flex min-w-0 items-center gap-1">
+                <Link href={href} className="block min-w-0 flex-1 truncate text-[14px] font-extrabold text-[#202229] hover:underline">{project.title}</Link>
+                <ToolButton label="修改项目名称" onClick={() => { setDraft(project.title); setEditing(true) }}><Pencil size={13} /></ToolButton>
+              </div>
+            )}
             <p className="mt-1 truncate text-[11px] text-[#858992]">来源：{project.source}</p>
           </div>
           <div className="flex shrink-0 items-center">
