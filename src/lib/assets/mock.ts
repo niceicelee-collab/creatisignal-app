@@ -81,7 +81,8 @@ export const ASSETS_BRIEFS: AssetItem[] = ASSETS_GENERATED.slice(16, 24).map((it
   ...item,
   id: `brief_${index + 1}`,
   kind: "image",
-  caption: ["运动内衣 UGC Brief", "便携榨汁杯 Brief", "婚纱广告 Brief", "美妆测评 Brief", "家居好物 Brief", "户外装备 Brief", "节日促销 Brief", "新品首发 Brief"][index],
+  timeLabel: ["08/17 18:14", "08/17 17:08", "08/16 13:16", "08/15 22:31", "08/15 22:30", "08/15 13:10", "08/14 22:46", "08/14 13:38"][index],
+  caption: ["FlexForm 运动内衣 · 痛点对比脚本", "FlexForm 运动内衣 · 训练实测脚本", "FlexForm 运动内衣 · 稳定承托脚本", "FlexForm 运动内衣 · 面料细节脚本", "FlexForm 运动内衣 · 日常通勤脚本", "FlexForm 运动内衣 · 高强度训练脚本", "FlexForm 运动内衣 · 用户测评脚本", "FlexForm 运动内衣 · 新品首发脚本"][index],
 }))
 
 export const ASSETS_UPLOADED: AssetItem[] = Array.from({ length: 16 }, (_, i) => ({

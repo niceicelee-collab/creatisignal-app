@@ -23,7 +23,7 @@ export type ReportTab = "report" | "analysis" | "brief" | "generate"
 export const REPORT_TABS: { id: ReportTab; label: string; icon: LucideIcon }[] = [
   { id: "report",   label: "报告",       icon: FileText },
   { id: "analysis", label: "分析结果",   icon: BarChart2 },
-  { id: "brief",    label: "Brief 结果", icon: BookOpen },
+  { id: "brief",    label: "脚本结果", icon: BookOpen },
   { id: "generate", label: "生成结果",   icon: Sparkles },
 ]
 

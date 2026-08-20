@@ -9,12 +9,14 @@ interface Props {
   selecting: boolean
   selected: boolean
   onToggleSelect: () => void
+  onOpen?: () => void
+  showCaption?: boolean
   favorite?: boolean
   onToggleFavorite?: () => void
   favoritable?: boolean
 }
 
-export function AssetCard({ item, selecting, selected, onToggleSelect, favorite = false, onToggleFavorite, favoritable = false }: Props) {
+export function AssetCard({ item, selecting, selected, onToggleSelect, onOpen, showCaption = false, favorite = false, onToggleFavorite, favoritable = false }: Props) {
   const kindMeta = ASSET_KIND_META[item.kind]
   const TypeIcon =
     item.kind === "video" ? Video :
@@ -24,13 +26,20 @@ export function AssetCard({ item, selecting, selected, onToggleSelect, favorite 
 
   return (
     <article
-      onClick={selecting ? onToggleSelect : undefined}
+      onClick={selecting ? onToggleSelect : onOpen}
+      onKeyDown={(event) => {
+        if (!onOpen || selecting || (event.key !== "Enter" && event.key !== " ")) return
+        event.preventDefault()
+        onOpen()
+      }}
+      role={onOpen && !selecting ? "button" : undefined}
+      tabIndex={onOpen && !selecting ? 0 : undefined}
       className={cn(
         "group relative rounded-2xl overflow-hidden bg-white border transition-all",
         selecting && selected
           ? "border-[#18181b] shadow-[0_0_0_3px_rgba(24,24,27,0.18)]"
           : "border-[var(--line)] hover:border-[var(--line-strong)]",
-        selecting && "cursor-pointer"
+        (selecting || onOpen) && "cursor-pointer"
       )}
     >
       {/* 缩略图 */}
@@ -92,7 +101,10 @@ export function AssetCard({ item, selecting, selected, onToggleSelect, favorite 
 
       {/* 底部信息 */}
       <div className="px-3 py-2.5 flex items-center justify-between gap-2">
-        <span className="text-[11.5px] text-[var(--muted)] truncate font-semibold">{item.deletedAt ? `删除于 ${item.deletedAt}` : item.timeLabel}</span>
+        <span className="min-w-0">
+          {showCaption ? <span className="block truncate text-[12.5px] font-extrabold text-[var(--text)]">{item.caption}</span> : null}
+          <span className={cn("block truncate text-[11.5px] font-semibold text-[var(--muted)]", showCaption && "mt-1")}>{item.deletedAt ? `删除于 ${item.deletedAt}` : item.timeLabel}</span>
+        </span>
         {!selecting && (
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
             <IconBtn icon={Download} label="下载" />

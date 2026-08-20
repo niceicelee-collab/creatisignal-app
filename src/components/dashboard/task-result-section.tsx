@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { ReportTab } from "@/components/reports/reports-content"
 
 // tab 标签，与「创意助手」上方四模式保持一致
-const TAB_LABELS = ["创意 report", "创意分析", "创意 brief", "创意生成"]
+const TAB_LABELS = ["创意 report", "创意分析", "创意脚本", "创意生成"]
 const TAB_KEYS: ReportTab[] = ["report", "analysis", "brief", "generate"]
 
 type TaskCard = { icon: LucideIcon; title: string; desc: string; date: string }
@@ -27,7 +27,7 @@ const TASKS_BY_TAB: TaskCard[][] = [
     { icon: BarChart2, title: "受众重叠诊断",        desc: "3 个广告组人群重合度 64%",         date: "06/19" },
     { icon: BarChart2, title: "ROI 拐点分析",        desc: "fp_021 投放第 12 天进入衰退",       date: "06/17" },
   ],
-  // 创意 brief
+  // 创意脚本
   [
     { icon: BookOpen, title: "春季新品 Brief",      desc: "面向 UGC 达人的 5 条拍摄方向",     date: "今天" },
     { icon: BookOpen, title: "Hook 改写 Brief 5 条", desc: "基于 ZF7899 主打卖点重写",          date: "昨天" },

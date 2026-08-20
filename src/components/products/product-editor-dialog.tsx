@@ -148,7 +148,7 @@ function TextArea({ label, value, placeholder, onChange, compact }: { label: str
       <span className="text-[13px] font-extrabold text-[#171a16]">{label}</span>
       <span className="relative mt-2 block">
         <textarea value={value} maxLength={3000} rows={compact ? 4 : 5} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} className={cn("w-full resize-none rounded-2xl border border-[#cfd3cc] px-4 pb-9 pt-3 text-[13px] font-medium leading-6 text-[#20241f] outline-none transition placeholder:text-[#a7ada4] focus:border-[#8cab37] focus:ring-4 focus:ring-[#c9ff29]/15", compact && "min-h-28")} />
-        <span className="absolute bottom-3 left-4 flex items-center gap-1.5 text-[10.5px] font-bold text-[#a1a7a0]"><Sparkles size={11} />AI 建议</span>
+        <span className="absolute bottom-3 left-4 flex items-center gap-1.5 text-[10.5px] font-bold text-[#a1a7a0]"><Sparkles size={11} />AI自动提取/生成建议</span>
         <span className="absolute bottom-3 right-4 text-[10px] text-[#767d73]">{value.length}/3000</span>
       </span>
     </label>

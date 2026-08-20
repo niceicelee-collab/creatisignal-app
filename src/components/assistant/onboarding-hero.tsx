@@ -55,7 +55,7 @@ const CARDS: {
     mode: "brief",
     accent: "green",
     icon: <BookOpen size={18} strokeWidth={2.2} />,
-    title: "创意 Brief",
+    title: "创意脚本",
     desc: "一句话出 5 条可拍摄的 Brief",
     ctaLabel: "🚀 免费生成 Brief",
     ctaSub: "不消耗积分 · 首条免费",

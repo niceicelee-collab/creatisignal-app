@@ -1,8 +1,10 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
+import Link from "next/link"
 import {
   ArrowDownAZ,
+  BookOpen,
   Calendar,
   Check,
   ChevronDown,
@@ -25,6 +27,7 @@ import { cn } from "@/lib/utils"
 import { STORAGE_USAGE, type AssetItem, type AssetTab } from "@/lib/assets/mock"
 import { useAssetsState } from "@/lib/assets/state"
 import { Topbar } from "@/components/layout/topbar"
+import { TaskResultModal } from "@/components/assistant/task-result-modal"
 import { AssetCard } from "./asset-card"
 
 interface Props {
@@ -34,7 +37,7 @@ interface Props {
 const TYPE_OPTIONS = ["全部类型", "图片", "视频", "数字人", "商品"]
 const UPLOAD_TYPE_OPTIONS = ["全部类型", "图片", "视频"]
 const KIND_FILTER_OPTIONS = ["全部", "高质量", "AI 生成", "上传", "已收藏"]
-const SORT_OPTIONS = ["从新到旧", "从旧到新", "按名称", "按大小"]
+const SORT_OPTIONS = ["从新到旧", "从旧到新"]
 const AVATAR_GENDER_OPTIONS = ["全部性别", "男性", "女性"]
 
 export function AssetShell({ tab }: Props) {
@@ -50,6 +53,7 @@ export function AssetShell({ tab }: Props) {
   const [avatarGender, setAvatarGender] = useState(AVATAR_GENDER_OPTIONS[0])
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [openBrief, setOpenBrief] = useState<AssetItem | null>(null)
   const avatarUploadRef = useRef<HTMLInputElement>(null)
   // 模拟列表 mutations 后的可见集
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
@@ -135,28 +139,36 @@ export function AssetShell({ tab }: Props) {
         {/* 资产分类已迁移到左侧二级菜单；正文只保留当前页面操作 */}
         <div className="bg-white sticky top-0 z-10">
           {tab !== "avatars" ? <div className="px-6 pt-3 pb-3 flex items-center gap-2 flex-wrap justify-end">
+            {tab === "briefs" ? (
+              <Link href="/assistant?mode=brief" className="flex h-9 items-center gap-1.5 rounded-lg bg-[#18181b] px-4 text-[12.5px] font-extrabold text-white transition hover:opacity-90">
+                <Plus size={13} strokeWidth={2.6} />
+                创建脚本
+              </Link>
+            ) : (
+              <>
+                {/* 存储用量 */}
+                <StorageBar />
 
-            {/* 存储用量 */}
-            <StorageBar />
-
-            {/* 批量操作 / 生成按钮 */}
-            <button
-              type="button"
-              onClick={toggleBatchMode}
-              className={cn(
-                "h-9 px-3 rounded-lg text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer transition-colors",
-                selecting
-                  ? "bg-[var(--soft)] text-[var(--text)] border border-[var(--line-strong)]"
-                  : "border border-[var(--line)] text-[var(--text)] hover:bg-[var(--soft-2)]"
-              )}
-            >
-              <RefreshCcw size={12} strokeWidth={2.4} />
-              批量操作
-            </button>
-            {tab !== "uploaded" ? <>
-              <button type="button" className="h-9 px-3 rounded-lg bg-[#18181b] text-white text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer hover:opacity-90"><Wand2 size={12} strokeWidth={2.4} />生成图片</button>
-              <button type="button" className="h-9 px-3 rounded-lg bg-[#18181b] text-white text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer hover:opacity-90"><Video size={12} strokeWidth={2.4} />生成视频</button>
-            </> : null}
+                {/* 批量操作 / 生成按钮 */}
+                <button
+                  type="button"
+                  onClick={toggleBatchMode}
+                  className={cn(
+                    "h-9 px-3 rounded-lg text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer transition-colors",
+                    selecting
+                      ? "bg-[var(--soft)] text-[var(--text)] border border-[var(--line-strong)]"
+                      : "border border-[var(--line)] text-[var(--text)] hover:bg-[var(--soft-2)]"
+                  )}
+                >
+                  <RefreshCcw size={12} strokeWidth={2.4} />
+                  批量操作
+                </button>
+                {tab !== "uploaded" ? <>
+                  <button type="button" className="h-9 px-3 rounded-lg bg-[#18181b] text-white text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer hover:opacity-90"><Wand2 size={12} strokeWidth={2.4} />生成图片</button>
+                  <button type="button" className="h-9 px-3 rounded-lg bg-[#18181b] text-white text-[12.5px] font-extrabold flex items-center gap-1.5 cursor-pointer hover:opacity-90"><Video size={12} strokeWidth={2.4} />生成视频</button>
+                </> : null}
+              </>
+            )}
           </div> : null}
 
           {tab === "avatars" ? (
@@ -212,13 +224,20 @@ export function AssetShell({ tab }: Props) {
               <FilterPill icon={Filter} value={avatarGender} options={AVATAR_GENDER_OPTIONS} onChange={setAvatarGender} />
               <button type="button" onClick={() => setFavoritesOnly((current) => !current)} className={cn("flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12.5px] font-bold transition", favoritesOnly ? "border-[#a7c948] bg-[#f3ffd5] text-[#415714]" : "border-[var(--line)] bg-white text-[var(--text)] hover:border-[var(--line-strong)]")}><Star size={12} fill={favoritesOnly ? "currentColor" : "none"} />收藏</button>
             </div>
+          ) : tab === "briefs" ? (
+            <div className="flex items-center justify-between gap-3 px-6 py-3">
+              <button type="button" onClick={() => setFavoritesOnly((current) => !current)} className={cn("flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12.5px] font-bold transition", favoritesOnly ? "border-[#a7c948] bg-[#f3ffd5] text-[#415714]" : "border-[var(--line)] bg-white text-[var(--text)] hover:border-[var(--line-strong)]")}><Star size={12} fill={favoritesOnly ? "currentColor" : "none"} />收藏</button>
+              <div className="flex items-center gap-2">
+                <FilterPill icon={ArrowDownAZ} value={sort} options={SORT_OPTIONS} onChange={setSort} />
+                <ViewToggle view={view} onChange={setView} />
+              </div>
+            </div>
           ) : (
             <div className="px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 <FilterPill icon={Filter} value={typeFilter} options={tab === "uploaded" ? UPLOAD_TYPE_OPTIONS : TYPE_OPTIONS} onChange={setTypeFilter} />
                 <FilterPill icon={Calendar} value={tab === "uploaded" ? "上传时间日期" : "选择日期范围"} options={["近 7 天", "近 30 天", "近 90 天", "全部"]} onChange={() => {}} />
                 {tab !== "uploaded" ? <FilterPill icon={Sparkles} value={kindFilter} options={KIND_FILTER_OPTIONS} onChange={setKindFilter} /> : null}
-                {tab === "briefs" ? <button type="button" onClick={() => setFavoritesOnly((current) => !current)} className={cn("flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12.5px] font-bold transition", favoritesOnly ? "border-[#a7c948] bg-[#f3ffd5] text-[#415714]" : "border-[var(--line)] bg-white text-[var(--text)] hover:border-[var(--line-strong)]")}><Star size={12} fill={favoritesOnly ? "currentColor" : "none"} />收藏</button> : null}
               </div>
               <div className="flex items-center gap-2">
                 <FilterPill icon={ArrowDownAZ} value={sort} options={SORT_OPTIONS} onChange={setSort} />
@@ -233,34 +252,60 @@ export function AssetShell({ tab }: Props) {
           {visibleItems.length === 0 ? (
             <EmptyState tab={tab} />
           ) : view === "grid" ? (
-            <div className="grid grid-cols-4 gap-3.5">
-              {tab === "avatars" && avatarScope === "mine" ? (
-                <>
-                  <input ref={avatarUploadRef} type="file" accept="image/*" className="hidden" onChange={(event) => uploadAvatar(event.target.files)} />
-                  <button type="button" onClick={() => avatarUploadRef.current?.click()} className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--line-strong)] bg-white text-[var(--muted)] transition hover:border-[#93b43b] hover:bg-[#fbfff2] hover:text-[#273019]">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--soft)] transition group-hover:bg-[#eaffaa]"><Plus size={22} /></span>
-                    <span className="text-[12px] font-extrabold">上传数字人</span>
-                  </button>
-                </>
-              ) : null}
-              {visibleItems.map((it) => (
-                <AssetCard
-                  key={it.id}
-                  item={it}
-                  selecting={selecting}
-                  selected={selected.has(it.id)}
-                  onToggleSelect={() => toggleItem(it.id)}
-                  favorite={favoriteIds.has(it.id)}
-                  onToggleFavorite={() => toggleFavorite(it.id)}
-                  favoritable={tab === "avatars" || tab === "briefs"}
-                />
-              ))}
-            </div>
+            tab === "briefs" ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {visibleItems.map((it) => (
+                  <BriefAssetCard
+                    key={it.id}
+                    item={it}
+                    selecting={selecting}
+                    selected={selected.has(it.id)}
+                    onToggleSelect={() => toggleItem(it.id)}
+                    favorite={favoriteIds.has(it.id)}
+                    onToggleFavorite={() => toggleFavorite(it.id)}
+                    onOpen={() => setOpenBrief(it)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-3.5">
+                {tab === "avatars" && avatarScope === "mine" ? (
+                  <>
+                    <input ref={avatarUploadRef} type="file" accept="image/*" className="hidden" onChange={(event) => uploadAvatar(event.target.files)} />
+                    <button type="button" onClick={() => avatarUploadRef.current?.click()} className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--line-strong)] bg-white text-[var(--muted)] transition hover:border-[#93b43b] hover:bg-[#fbfff2] hover:text-[#273019]">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--soft)] transition group-hover:bg-[#eaffaa]"><Plus size={22} /></span>
+                      <span className="text-[12px] font-extrabold">上传数字人</span>
+                    </button>
+                  </>
+                ) : null}
+                {visibleItems.map((it) => (
+                  <AssetCard
+                    key={it.id}
+                    item={it}
+                    selecting={selecting}
+                    selected={selected.has(it.id)}
+                    onToggleSelect={() => toggleItem(it.id)}
+                    favorite={favoriteIds.has(it.id)}
+                    onToggleFavorite={() => toggleFavorite(it.id)}
+                    favoritable={tab === "avatars"}
+                  />
+                ))}
+              </div>
+            )
           ) : (
-            <ListView items={visibleItems} selecting={selecting} selected={selected} onToggle={toggleItem} />
+            <ListView items={visibleItems} selecting={selecting} selected={selected} onToggle={toggleItem} onOpen={tab === "briefs" ? setOpenBrief : undefined} />
           )}
         </div>
       </main>
+
+      <TaskResultModal
+        kind={openBrief ? "brief" : null}
+        open={Boolean(openBrief)}
+        onClose={() => setOpenBrief(null)}
+        briefTitle={openBrief?.caption}
+        briefFavorite={openBrief ? favoriteIds.has(openBrief.id) : false}
+        onToggleBriefFavorite={openBrief ? () => toggleFavorite(openBrief.id) : undefined}
+      />
 
       <style jsx>{`
         @keyframes csSlideDown {
@@ -270,6 +315,81 @@ export function AssetShell({ tab }: Props) {
         :global(.animate-cs-slide-down) { animation: csSlideDown 180ms ease-out both; }
       `}</style>
     </>
+  )
+}
+
+function BriefAssetCard({
+  item,
+  selecting,
+  selected,
+  onToggleSelect,
+  favorite,
+  onToggleFavorite,
+  onOpen,
+}: {
+  item: AssetItem
+  selecting: boolean
+  selected: boolean
+  onToggleSelect: () => void
+  favorite: boolean
+  onToggleFavorite: () => void
+  onOpen: () => void
+}) {
+  return (
+    <article
+      className={cn(
+        "group relative min-h-[170px] rounded-[18px] border bg-white p-5 transition-all",
+        selected
+          ? "border-[#7b68ee] ring-2 ring-[#7b68ee]/15"
+          : "border-[var(--line)] hover:-translate-y-0.5 hover:border-[#cec6ff] hover:shadow-[0_14px_32px_rgba(54,47,112,0.08)]"
+      )}
+    >
+      <button
+        type="button"
+        onClick={selecting ? onToggleSelect : onOpen}
+        className="flex h-full min-h-[128px] w-full flex-col text-left"
+      >
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f2efff] text-[#6c5ce7]">
+          <BookOpen size={21} strokeWidth={2.2} />
+        </span>
+        <span className="mt-4 block max-w-[calc(100%-36px)] truncate text-[15px] font-black text-[#292d34]">
+          {item.caption ?? "未命名创意脚本"}
+        </span>
+        <span className="mt-1.5 text-[11.5px] font-medium text-[#979da7]">创意脚本已完成</span>
+        <span className="mt-auto flex w-full items-center justify-between gap-4 pt-5">
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-extrabold text-[#45c97b]">
+            <span className="h-2 w-2 rounded-full bg-[#50cd82]" />
+            已完成
+          </span>
+          <span className="whitespace-nowrap text-[11px] font-bold tabular-nums text-[#9aa0aa]">{item.timeLabel}</span>
+        </span>
+      </button>
+
+      {!selecting ? (
+        <button
+          type="button"
+          aria-label={favorite ? "取消收藏" : "收藏"}
+          onClick={onToggleFavorite}
+          className={cn(
+            "absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full transition-all",
+            favorite
+              ? "bg-[#f3ffd5] text-[#6e8f25]"
+              : "bg-white text-[#a3a7af] opacity-0 shadow-sm ring-1 ring-[var(--line)] hover:text-[#6c5ce7] group-hover:opacity-100"
+          )}
+        >
+          <Star size={14} fill={favorite ? "currentColor" : "none"} />
+        </button>
+      ) : (
+        <span
+          className={cn(
+            "absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full",
+            selected ? "bg-[#6c5ce7] text-white" : "border-2 border-[var(--line-strong)] bg-white"
+          )}
+        >
+          {selected ? <Check size={13} strokeWidth={3} /> : null}
+        </span>
+      )}
+    </article>
   )
 }
 
@@ -406,11 +526,12 @@ function BatchBtn({
 
 // ─── List view ───────────────────────────────────────────────────────────────
 
-function ListView({ items, selecting, selected, onToggle }: {
+function ListView({ items, selecting, selected, onToggle, onOpen }: {
   items: AssetItem[]
   selecting: boolean
   selected: Set<string>
   onToggle: (id: string) => void
+  onOpen?: (item: AssetItem) => void
 }) {
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-white overflow-hidden">
@@ -428,10 +549,10 @@ function ListView({ items, selecting, selected, onToggle }: {
           {items.map((it, i) => (
             <tr
               key={it.id}
-              onClick={selecting ? () => onToggle(it.id) : undefined}
+              onClick={selecting ? () => onToggle(it.id) : onOpen ? () => onOpen(it) : undefined}
               className={cn(
                 i > 0 && "border-t border-[var(--line)]",
-                selecting && "cursor-pointer hover:bg-[var(--soft-2)]"
+                (selecting || onOpen) && "cursor-pointer hover:bg-[var(--soft-2)]"
               )}
             >
               {selecting && (
@@ -470,7 +591,7 @@ function EmptyState({ tab }: { tab: AssetTab }) {
   const meta: Record<AssetTab, { title: string; sub: string }> = {
     reports:   { title: "还没有创意报告",          sub: "生成或保存的创意报告会展示在此处" },
     analysis:  { title: "还没有创意分析",          sub: "完成素材分析后可保存到资产库" },
-    briefs:    { title: "还没有创意 Brief",        sub: "确认后的 Brief 会集中展示在此处" },
+    briefs:    { title: "还没有创意脚本",          sub: "确认后的创意脚本会集中展示在此处" },
     generated: { title: "还没有 AI 生成的资产",  sub: "用「生成图片」/「生成视频」开始创作" },
     uploaded:  { title: "还没有上传的资产",      sub: "拖拽到此处或点上传开始" },
     avatars:   { title: "还没有数字人",          sub: "去数字人工作室创建" },

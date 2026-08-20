@@ -25,7 +25,7 @@ const COPY: Record<TaskKind, ToastContent> = {
     primary: { label: "进入高保真复刻", href: "/replicate" },
   },
   brief: {
-    title: "Brief 已经准备好",
+    title: "创意脚本已经准备好",
     desc: "下一步：进入创意生成，把 Brief 变成视频",
     primary: { label: "进入创意生成", href: "/create/video" },
   },

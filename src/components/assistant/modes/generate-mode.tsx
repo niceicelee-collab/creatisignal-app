@@ -5,15 +5,23 @@ import { useRouter } from "next/navigation"
 import { Video, Image, UserRound, ChevronDown, SlidersHorizontal, Sparkles, Star, X, Play, Link2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SendButton } from "../send-button"
-import { ImageSelectModal, type ImageItem } from "@/components/modals/image-select-modal"
+import type { ImageItem } from "@/components/modals/image-select-modal"
 import { VideoSelectModal, type VideoItem } from "@/components/modals/video-select-modal"
 import { DigitalHumanModal, type DHItem } from "@/components/modals/digital-human-modal"
 import { ReplicateSourceModal, type ReplicateSourceChoice } from "@/components/assistant/replicate-source-modal"
+import { ProductPickerDialog } from "@/components/products/product-picker-dialog"
+import type { Product } from "@/components/products/product-data"
 
 // ─── Types & Data ────────────────────────────────────────────────────────────
 
 type GenType = "video" | "image" | "remix" | "reverse"
 type ActivePopup = "task" | "model" | "hook" | "settings" | null
+type ProductImageReference = {
+  productId: Product["id"]
+  images: string[]
+}
+
+const MAX_PRODUCT_IMAGES = 8
 
 const TASK_TYPES: { id: "video" | "remix"; label: string; description: string; icon: typeof Video }[] = [
   { id: "video", label: "视频生成", description: "从提示词生成新视频", icon: Video },
@@ -471,6 +479,40 @@ function MediaThumb({ src, type, label, onRemove }: {
   )
 }
 
+function ProductImageStrip({ images, onRemove }: {
+  images: string[]
+  onRemove: (image: string) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[11px] font-semibold text-[#777d87]">
+        产品图 <span className="font-medium text-[#9a9fa8]">({images.length}/{MAX_PRODUCT_IMAGES})</span>
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {images.map((image, index) => (
+          <div key={image} className="group relative h-12 w-12 shrink-0 overflow-visible">
+            <div className="relative h-12 w-12 overflow-hidden rounded-lg border border-[#dfe2dc] bg-[#f4f5f2]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt={`产品图${index + 1}`} className="h-full w-full object-cover" />
+              <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-3 text-center text-[9px] font-bold text-white">
+                产品图{index + 1}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => onRemove(image)}
+              aria-label={`移除产品图${index + 1}`}
+              className="absolute -right-1.5 -top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-[#18181b] text-white shadow-sm transition hover:bg-[#444]"
+            >
+              <X size={8} strokeWidth={2.5} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Upload slot ──────────────────────────────────────────────────────────────
 
 const pickerBtn = "h-[34px] border border-transparent rounded-full bg-white text-[#18181b] px-[9px] flex items-center gap-1.5 text-[13px] font-[650] cursor-pointer hover:bg-[var(--soft)] whitespace-nowrap"
@@ -530,13 +572,14 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
 
   // Selected media
   const [selectedImages, setSelectedImages] = useState<ImageItem[]>([])
+  const [selectedProductImage, setSelectedProductImage] = useState<ProductImageReference | null>(null)
   const [selectedVideos, setSelectedVideos] = useState<VideoItem[]>([])
   const [digitalHuman, setDigitalHuman] = useState<DHItem | null>(null)
   const [replicateReference, setReplicateReference] = useState<ReplicateSourceChoice | null>(null)
   const [uploadedReference, setUploadedReference] = useState<{ name: string; previewUrl: string } | null>(null)
 
   // Modal open states
-  const [imageModalOpen, setImageModalOpen] = useState(false)
+  const [productPickerOpen, setProductPickerOpen] = useState(false)
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [dhModalOpen, setDhModalOpen] = useState(false)
   const [replicateSourceOpen, setReplicateSourceOpen] = useState(false)
@@ -546,6 +589,14 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
       if (uploadedReference?.previewUrl) URL.revokeObjectURL(uploadedReference.previewUrl)
     }
   }, [uploadedReference])
+
+  useEffect(() => {
+    return () => {
+      selectedImages.forEach((item) => {
+        if (item.thumb.startsWith("blob:")) URL.revokeObjectURL(item.thumb)
+      })
+    }
+  }, [selectedImages])
 
   function openReplicateWorkspace(choice?: ReplicateSourceChoice) {
     const params = new URLSearchParams()
@@ -570,6 +621,32 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
     if (!file) return
     setReplicateReference(null)
     setUploadedReference({ name: file.name, previewUrl: URL.createObjectURL(file) })
+  }
+
+  function handleLocalImageUpload(file?: File) {
+    if (!file || !file.type.startsWith("image/")) return
+    selectedImages.forEach((item) => {
+      if (item.thumb.startsWith("blob:")) URL.revokeObjectURL(item.thumb)
+    })
+    setSelectedProductImage(null)
+    setSelectedImages([{ id: `local-${Date.now()}`, thumb: URL.createObjectURL(file), name: file.name }])
+  }
+
+  function handleProductSelect(product: Product) {
+    selectedImages.forEach((item) => {
+      if (item.thumb.startsWith("blob:")) URL.revokeObjectURL(item.thumb)
+    })
+    setSelectedImages([])
+    const images = Array.from(new Set([product.image, ...product.media].filter(Boolean))).slice(0, MAX_PRODUCT_IMAGES)
+    setSelectedProductImage({ productId: product.id, images })
+  }
+
+  function removeProductImage(image: string) {
+    setSelectedProductImage((current) => {
+      if (!current) return null
+      const images = current.images.filter((item) => item !== image)
+      return images.length > 0 ? { ...current, images } : null
+    })
   }
 
   function handleSend() {
@@ -628,7 +705,7 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
           {genType === "video" && (
             <>
-              <UploadSlot label="图片" icon={Image} onClick={() => setImageModalOpen(true)} />
+              <UploadSlot label="选择图片" icon={Image} onClick={() => setProductPickerOpen(true)} />
               <UploadSlot label="视频" icon={Video} onClick={() => setVideoModalOpen(true)} />
               {digitalHuman ? (
                 <div className="relative h-[40px] w-[40px] shrink-0">
@@ -654,7 +731,7 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
               )}
             </>
           )}
-          {genType === "image" && <UploadSlot label="图片" icon={Image} onClick={() => setImageModalOpen(true)} />}
+          {genType === "image" && <UploadSlot label="选择图片" icon={Image} onClick={() => setProductPickerOpen(true)} />}
           {genType === "reverse" && (
             <UploadSlot label="视频" icon={Video} onClick={() => setVideoModalOpen(true)} />
           )}
@@ -746,6 +823,10 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
           />
         </div>
       </div>
+
+      {selectedProductImage ? (
+        <ProductImageStrip images={selectedProductImage.images} onRemove={removeProductImage} />
+      ) : null}
 
       {/* Config row */}
       <div ref={configRef} className="flex items-center justify-between gap-3">
@@ -874,13 +955,13 @@ export function GenerateMode({ initialPrompt, onSubmit, submitting }: GenerateMo
       </div>
 
       {/* Modals */}
-      <ImageSelectModal
-        open={imageModalOpen}
-        onOpenChange={setImageModalOpen}
-        onConfirm={(items) => setSelectedImages((prev) => {
-          const existingIds = new Set(prev.map((i) => i.id))
-          return [...prev, ...items.filter((i) => !existingIds.has(i.id))]
-        })}
+      <ProductPickerDialog
+        open={productPickerOpen}
+        onOpenChange={setProductPickerOpen}
+        selectedId={selectedProductImage?.productId}
+        onSelect={handleProductSelect}
+        allowLocalUpload
+        onUpload={handleLocalImageUpload}
       />
       <VideoSelectModal
         open={videoModalOpen}

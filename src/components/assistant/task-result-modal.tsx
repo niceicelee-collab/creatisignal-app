@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import * as Dialog from "@radix-ui/react-dialog"
 import {
   ArrowRight,
@@ -9,11 +10,13 @@ import {
   Boxes,
   CheckCircle2,
   ChevronLeft,
+  Copy,
   ExternalLink,
   FileText,
   Globe2,
   Play,
   Sparkles,
+  Star,
   Video,
   X,
   type LucideIcon,
@@ -25,6 +28,9 @@ interface Props {
   kind: TaskKind | null
   open: boolean
   onClose: () => void
+  briefTitle?: string
+  briefFavorite?: boolean
+  onToggleBriefFavorite?: () => void
 }
 
 type Section = { label: string; body: React.ReactNode }
@@ -133,22 +139,11 @@ const CONFIG: Record<TaskKind, {
     icon: BookOpen,
     iconBg: "#f0fdf4",
     iconColor: "#16a34a",
-    title: "Hotligh ZF7899 磁吸车载灯 Brief",
-    subtitle: "5 条可拍摄方向 · UGC 达人风格",
-    meta: "今天 · 来自创意助手 · 创意 Brief",
-    sections: [
-      { label: "目标人群", body: "户外通勤 / 修车爱好者 / EDC 用户（25-44 男）" },
-      { label: "5 条拍摄方向", body: (
-        <ol className="list-decimal pl-5 space-y-1.5 text-[12.5px] leading-relaxed">
-          <li>磁吸吸到引擎盖，双手解放修车</li>
-          <li>极端冲水测试，证明 IPX5</li>
-          <li>对比手机灯，亮度反差</li>
-          <li>夜间露营场景，多模式切换</li>
-          <li>EDC 口袋实拍，便携性</li>
-        </ol>
-      ) },
-      { label: "CTA", body: "Keep one in your car." },
-    ],
+    title: "FlexForm 高支撑运动内衣创意脚本",
+    subtitle: "15 秒 · 用户原创自然口播 · 英语（美国）",
+    meta: "刚刚 · 来自创意助手 · 创意脚本",
+    hero: <BriefScriptTable />,
+    sections: [],
   },
   analysis: {
     icon: BarChart2,
@@ -175,14 +170,110 @@ function Pills({ items }: { items: string[] }) {
   )
 }
 
+const BRIEF_SCRIPT_ROWS = [
+  {
+    shot: "1",
+    time: "0–3s",
+    duration: "3s",
+    visual: "近景：女性训练到一半停下动作，再次整理不断滑动的肩带。手持镜头快速推近肩部，捕捉略显无奈的表情。",
+    voiceover: "Still fixing your straps mid-workout?",
+    screenText: "STRAPS SLIPPING AGAIN?",
+    notes: "首秒直接出现痛点；手持跟拍，保留真实训练感。",
+  },
+  {
+    shot: "2",
+    time: "3–7s",
+    duration: "4s",
+    visual: "切换到穿着 FlexForm 的同角度画面。人物快速完成深蹲和开合跳，镜头稳定跟随，突出肩带与下围始终贴合。",
+    voiceover: "Let's see what real support looks like.",
+    screenText: "STABLE SUPPORT. NO DIGGING.",
+    notes: "动作前后保持同机位，方便形成清晰对比。",
+  },
+  {
+    shot: "3",
+    time: "7–11s",
+    duration: "4s",
+    visual: "肩带、透气面料和稳定下围的连续特写。手指轻压肩带展示受力分散，随后拉伸面料表现弹性与回弹。",
+    voiceover: "Wide straps spread pressure, while the underband keeps everything secure.",
+    screenText: "WIDE STRAPS · SECURE BAND · BREATHABLE STRETCH",
+    notes: "使用柔和侧光突出面料纹理；避免过度磨皮。",
+  },
+  {
+    shot: "4",
+    time: "11–15s",
+    duration: "4s",
+    visual: "人物完成训练动作后自然站定，轻松抬手并微笑。最后切到产品正面与品牌标识，画面干净收束。",
+    voiceover: "Move freely. Stay supported. Meet FlexForm.",
+    screenText: "ALL-DAY SUPPORT BY FLEXFORM",
+    notes: "结尾品牌标识至少停留 1.5 秒；产品颜色保持准确。",
+  },
+] as const
+
+function BriefScriptTable() {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-[#e2e5df] bg-white">
+      <table className="w-full min-w-[980px] table-fixed text-left">
+        <colgroup>
+          <col className="w-[54px]" />
+          <col className="w-[72px]" />
+          <col className="w-[62px]" />
+          <col className="w-[290px]" />
+          <col className="w-[205px]" />
+          <col className="w-[145px]" />
+          <col className="w-[200px]" />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-[#dfe3dc] bg-[#f8f9f7] text-[11px] font-extrabold text-[#555c52]">
+            <th className="px-3 py-3 whitespace-nowrap">镜头</th>
+            <th className="px-3 py-3">时间</th>
+            <th className="px-3 py-3 whitespace-nowrap">时长</th>
+            <th className="px-3 py-3">画面描述</th>
+            <th className="px-3 py-3">旁白/口播</th>
+            <th className="px-3 py-3">屏幕文字</th>
+            <th className="px-3 py-3">备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          {BRIEF_SCRIPT_ROWS.map((row) => (
+            <tr key={row.shot} className="border-b border-[#e8ebe5] align-top last:border-b-0">
+              <td className="px-3 py-3.5 whitespace-nowrap text-[12px] font-black text-[#252a23]">{row.shot}</td>
+              <td className="px-3 py-3.5 whitespace-nowrap text-[11.5px] font-bold text-[#5f665c]">{row.time}</td>
+              <td className="px-3 py-3.5 whitespace-nowrap text-[11.5px] font-bold text-[#5f665c]">{row.duration}</td>
+              <td className="px-3 py-3.5 text-[12px] leading-5 text-[#333831]">{row.visual}</td>
+              <td className="px-3 py-3.5 text-[12px] font-medium leading-5 text-[#20241f]">{row.voiceover}</td>
+              <td className="px-3 py-3.5 text-[12px] font-extrabold leading-5 text-[#333831]">{row.screenText}</td>
+              <td className="px-3 py-3.5 text-[11.5px] leading-5 text-[#6d746a]">{row.notes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 // ─── Main modal ──────────────────────────────────────────────────────────────
 
-export function TaskResultModal({ kind, open, onClose }: Props) {
+export function TaskResultModal({ kind, open, onClose, briefTitle, briefFavorite, onToggleBriefFavorite }: Props) {
   const [openAsset, setOpenAsset] = useState<AssetKey | null>(null)
+  const [localFavorite, setLocalFavorite] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   if (!kind) return null
   const c = CONFIG[kind]
   const Icon = c.icon
+  const favorite = briefFavorite ?? localFavorite
+
+  async function copyBrief() {
+    const script = BRIEF_SCRIPT_ROWS.map((row) => [
+      `镜头 ${row.shot}｜${row.time}｜${row.duration}`,
+      `画面描述：${row.visual}`,
+      `旁白/口播：${row.voiceover}`,
+      `屏幕文字：${row.screenText}`,
+      `备注：${row.notes}`,
+    ].join("\n")).join("\n\n")
+    await navigator.clipboard.writeText(`${briefTitle ?? c.title}\n\n${script}`)
+    setCopied(true)
+  }
 
   return (
     <>
@@ -192,9 +283,11 @@ export function TaskResultModal({ kind, open, onClose }: Props) {
           <Dialog.Content
             className={cn(
               "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[75]",
-              "w-[min(560px,calc(100vw-32px))] max-h-[88vh] rounded-2xl bg-white shadow-[0_28px_72px_rgba(9,9,11,0.28)] flex flex-col overflow-hidden",
+              kind !== "brief" && "w-[min(560px,calc(100vw-32px))]",
+              "max-h-[88vh] rounded-2xl bg-white shadow-[0_28px_72px_rgba(9,9,11,0.28)] flex flex-col overflow-hidden",
               "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
             )}
+            style={kind === "brief" ? { width: "min(1120px, calc(100vw - 32px))" } : undefined}
           >
             {/* Header */}
             <div className="px-6 pt-5 pb-4 border-b border-[var(--line)] flex items-start gap-3">
@@ -202,7 +295,7 @@ export function TaskResultModal({ kind, open, onClose }: Props) {
                 <Icon size={18} strokeWidth={2.2} />
               </div>
               <div className="flex-1 min-w-0">
-                <Dialog.Title className="text-[17px] font-extrabold text-[var(--text)] leading-snug">{c.title}</Dialog.Title>
+                <Dialog.Title className="text-[17px] font-extrabold text-[var(--text)] leading-snug">{kind === "brief" && briefTitle ? briefTitle : c.title}</Dialog.Title>
                 <p className="text-[12.5px] text-[var(--muted)] mt-0.5">{c.subtitle}</p>
                 <p className="text-[11px] text-[var(--muted-2)] font-semibold mt-1.5">{c.meta}</p>
               </div>
@@ -236,18 +329,31 @@ export function TaskResultModal({ kind, open, onClose }: Props) {
 
             {/* Footer */}
             <div className="px-6 py-3 border-t border-[var(--line)] flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[var(--green-text)]">
-                <CheckCircle2 size={12} strokeWidth={2.4} />
-                结果已保存到「我的任务」
-              </span>
-              <button
-                type="button"
-                onClick={onClose}
-                className="h-9 px-4 rounded-full bg-[var(--near-black)] text-white text-[12.5px] font-bold flex items-center gap-1.5 cursor-pointer hover:opacity-90"
-              >
-                我知道了
-                <ArrowRight size={12} strokeWidth={2.4} />
-              </button>
+              {kind === "brief" ? (
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={copyBrief} className="flex h-9 items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-4 text-[12.5px] font-bold text-[var(--text)] transition hover:border-[var(--line-strong)]">
+                    {copied ? <CheckCircle2 size={13} strokeWidth={2.4} /> : <Copy size={13} strokeWidth={2.2} />}
+                    {copied ? "已复制" : "一键复制"}
+                  </button>
+                  <Link href="/assistant?mode=generate" onClick={onClose} className="flex h-9 items-center gap-1.5 rounded-full bg-[var(--lime)] px-4 text-[12.5px] font-extrabold text-[#1d260c] transition hover:brightness-95">
+                    去生成视频
+                    <ArrowRight size={12} strokeWidth={2.4} />
+                  </Link>
+                </div>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[var(--green-text)]">
+                  <CheckCircle2 size={12} strokeWidth={2.4} />
+                  结果已保存到「我的任务」
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                {kind === "brief" ? (
+                  <button type="button" onClick={onToggleBriefFavorite ?? (() => setLocalFavorite((current) => !current))} className={cn("flex h-9 items-center gap-1.5 rounded-full border px-4 text-[12.5px] font-bold transition", favorite ? "border-[#a7c948] bg-[#f3ffd5] text-[#415714]" : "border-[var(--line)] bg-white text-[var(--text)] hover:border-[var(--line-strong)]")}>
+                    <Star size={13} fill={favorite ? "currentColor" : "none"} />
+                    {favorite ? "已收藏" : "收藏"}
+                  </button>
+                ) : null}
+              </div>
             </div>
           </Dialog.Content>
         </Dialog.Portal>

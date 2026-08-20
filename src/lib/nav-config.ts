@@ -105,7 +105,7 @@ export const navSections: NavSection[] = [
     subMenu: [
       { label: "创意报告", href: "/assets/reports", icon: FileText },
       { label: "创意分析", href: "/assets/analysis", icon: BarChart3 },
-      { label: "创意Brief", href: "/assets/briefs", icon: FileText },
+      { label: "创意脚本", href: "/assets/briefs", icon: FileText },
       { label: "创意生成", href: "/assets/generated", icon: Sparkles },
       { label: "商品库", href: "/assets/products", icon: Box },
       { label: "数字人", href: "/assets/avatars", icon: Users },

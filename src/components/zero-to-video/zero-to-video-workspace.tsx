@@ -265,7 +265,7 @@ export function ZeroToVideoWorkspace() {
 
               <button type="button" disabled={briefLoading} onClick={handleGenerateBrief} className="flex h-12 w-full items-center justify-center gap-2 rounded-[15px] bg-[#1b1e1a] text-[13px] font-black text-white shadow-[0_12px_30px_rgba(26,30,24,0.16)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
                 {briefLoading ? <LoaderCircle size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                {briefLoading ? "正在生成 3 个创意方向…" : versions.length ? "重新生成创意 Brief" : "生成 3 个创意 Brief"}
+                {briefLoading ? "正在生成 3 个创意方向…" : versions.length ? "重新生成创意脚本" : "生成 3 个创意脚本"}
               </button>
             </aside>
 
@@ -344,7 +344,7 @@ export function ZeroToVideoWorkspace() {
 function StepBar({ step }: { step: 1 | 2 }) {
   return (
     <div className="grid overflow-hidden rounded-[18px] border border-[#dde1d9] bg-white md:grid-cols-2">
-      {[{ number: 1, title: "创意 Brief", desc: "选择商品与创作约束，比较 3 个创意版本" }, { number: 2, title: "创意视频", desc: "校正分镜，编译 Recipe 并提交 Seedance 任务" }].map((item) => {
+      {[{ number: 1, title: "创意脚本", desc: "选择商品与创作约束，比较 3 个创意版本" }, { number: 2, title: "创意视频", desc: "校正分镜，编译 Recipe 并提交 Seedance 任务" }].map((item) => {
         const active = step === item.number
         const complete = step > item.number
         return <div key={item.number} className={cn("flex items-center gap-3 px-5 py-4", active ? "bg-[#f5ffdc]" : "bg-white", item.number === 2 && "border-t border-[#e4e7e0] md:border-l md:border-t-0") }><span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-black", active ? "bg-[#1c2119] text-[#c9ff29]" : complete ? "bg-[#dff7a1] text-[#50661e]" : "bg-[#f0f1ee] text-[#9aa097]")}>{complete ? <Check size={14} strokeWidth={3} /> : item.number}</span><span><span className="block text-[12px] font-black text-[#242724]">{item.title}</span><span className="mt-0.5 block text-[10.5px] font-semibold text-[#858b82]">{item.desc}</span></span></div>
@@ -370,7 +370,7 @@ function EmptyBrief() {
 }
 
 function BriefLoading() {
-  return <div className="grid min-h-[360px] place-items-center rounded-[22px] border border-[#e0e4dc] bg-white"><div className="text-center"><LoaderCircle size={28} className="mx-auto animate-spin text-[#87a52e]" /><h2 className="mt-4 text-[14px] font-black text-[#252824]">正在生成创意 Brief</h2><p className="mt-1.5 text-[11px] font-semibold text-[#8a9087]">校验商品事实 · 区分创意机制 · 估算目标语言时长</p></div></div>
+  return <div className="grid min-h-[360px] place-items-center rounded-[22px] border border-[#e0e4dc] bg-white"><div className="text-center"><LoaderCircle size={28} className="mx-auto animate-spin text-[#87a52e]" /><h2 className="mt-4 text-[14px] font-black text-[#252824]">正在生成创意脚本</h2><p className="mt-1.5 text-[11px] font-semibold text-[#8a9087]">校验商品事实 · 区分创意机制 · 估算目标语言时长</p></div></div>
 }
 
 function BriefVersionCard({ version, selected, favorite, regenerating, onSelect, onFavorite, onRegenerate, onCopy }: { version: BriefVersion; selected: boolean; favorite: boolean; regenerating: boolean; onSelect: () => void; onFavorite: () => void; onRegenerate: () => void; onCopy: () => void }) {

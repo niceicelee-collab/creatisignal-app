@@ -15,7 +15,7 @@ const KPIS = [
 const TASK_DIST = [
   { name: "Report 报告生成",    count: 86, color: "#7c3aed" },
   { name: "Video 视频生成",     count: 142, color: "#0ea5e9" },
-  { name: "Brief 创意 Brief",   count: 64, color: "#16a34a" },
+  { name: "创意脚本",           count: 64, color: "#16a34a" },
   { name: "Analysis 创意分析",  count: 38, color: "#f97316" },
   { name: "Replicate 高保真复刻", count: 12, color: "#dc2626" },
 ]

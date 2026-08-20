@@ -12,10 +12,11 @@ export type Product = {
   image: string
   media: string[]
   status: ProductStatus
+  updatedAt: string
   sourceUrl?: string
 }
 
-export type ProductFormValue = Omit<Product, "id" | "status">
+export type ProductFormValue = Omit<Product, "id" | "status" | "updatedAt">
 
 export const EMPTY_PRODUCT_FORM: ProductFormValue = {
   name: "",
@@ -61,6 +62,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: "/replicate-covers/sports-bra.jpg",
     media: ["/replicate-covers/sports-bra.jpg"],
     status: "active",
+    updatedAt: "2026-08-17T04:20:00.000Z",
     sourceUrl: RECOGNIZED_PRODUCT_FORM.sourceUrl,
   },
   {
@@ -75,6 +77,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: "/replicate-covers/portable-blender.jpg",
     media: ["/replicate-covers/portable-blender.jpg"],
     status: "active",
+    updatedAt: "2026-08-16T09:15:00.000Z",
   },
   {
     id: "prd_03",
@@ -88,6 +91,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: "/replicate-covers/knit-cardigan.jpg",
     media: ["/replicate-covers/knit-cardigan.jpg"],
     status: "active",
+    updatedAt: "2026-08-15T07:40:00.000Z",
   },
   {
     id: "prd_04",
@@ -101,6 +105,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: "/replicate-covers/cargo-shorts.jpg",
     media: ["/replicate-covers/cargo-shorts.jpg"],
     status: "active",
+    updatedAt: "2026-08-14T11:25:00.000Z",
   },
   {
     id: "prd_05",
@@ -114,6 +119,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     image: "/replicate-covers/black-training-jacket.png",
     media: ["/replicate-covers/black-training-jacket.png"],
     status: "active",
+    updatedAt: "2026-08-13T06:05:00.000Z",
   },
   {
     id: "prd_06",
@@ -126,7 +132,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     scenarios: ["Daily makeup", "Travel", "Gifting"],
     image: "/replicate-covers/beauty-makeup.jpg",
     media: ["/replicate-covers/beauty-makeup.jpg"],
-    status: "active",
+    status: "review",
+    updatedAt: "2026-08-12T03:35:00.000Z",
   },
   {
     id: "prd_07",
@@ -139,7 +146,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     scenarios: ["Ceremony", "Reception", "Bridal editorial"],
     image: "/creative-assets/wedding-dress-cover.png",
     media: ["/creative-assets/wedding-dress-cover.png"],
-    status: "active",
+    status: "draft",
+    updatedAt: "2026-08-11T10:10:00.000Z",
   },
 ]
 
@@ -156,4 +164,13 @@ export function productToForm(product: Product): ProductFormValue {
     media: product.media,
     sourceUrl: product.sourceUrl,
   }
+}
+
+export function formatProductUpdatedAt(updatedAt: string) {
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(updatedAt))
 }

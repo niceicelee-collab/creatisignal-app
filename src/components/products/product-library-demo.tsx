@@ -13,16 +13,17 @@ import { Topbar } from "@/components/layout/topbar"
 import { ProductCreateDialog } from "./product-create-dialog"
 import { ProductEditorDialog } from "./product-editor-dialog"
 import {
-  INITIAL_PRODUCTS,
+  formatProductUpdatedAt,
   productToForm,
   type Product,
   type ProductFormValue,
 } from "./product-data"
+import { useProductLibrary } from "./product-store"
 
 type EditorState = { productId: string; value: ProductFormValue } | null
 
 export function ProductLibraryDemo() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS)
+  const { products, createProduct: addProduct, updateProduct, deleteProduct: removeProduct } = useProductLibrary()
   const [query, setQuery] = useState("")
   const [menuId, setMenuId] = useState<string | null>(null)
   const [editor, setEditor] = useState<EditorState>(null)
@@ -31,35 +32,28 @@ export function ProductLibraryDemo() {
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return products
-    return products.filter((product) => [product.name, product.description, ...product.sellingPoints].join(" ").toLowerCase().includes(normalized))
+    return products
+      .filter((product) => !normalized || [product.name, product.brand, product.description, ...product.sellingPoints].join(" ").toLowerCase().includes(normalized))
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
   }, [products, query])
 
   function saveProduct(value: ProductFormValue) {
     if (!editor) return
-    setProducts((current) => current.map((product) => product.id === editor.productId ? { ...product, ...value } : product))
+    updateProduct(editor.productId, value)
     setNotice("商品信息已更新")
     setEditor(null)
     window.setTimeout(() => setNotice(""), 2200)
   }
 
   function createProduct(value: ProductFormValue) {
-    const fallbackImage = value.image || "/replicate-covers/sports-bra.jpg"
-    const product: Product = {
-      id: `prd_${Date.now()}`,
-      status: "active",
-      ...value,
-      image: fallbackImage,
-      media: value.media.length ? value.media : [fallbackImage],
-    }
-    setProducts((current) => [product, ...current])
+    addProduct(value)
     setCreateMode(null)
     setNotice("商品已添加到商品库")
     window.setTimeout(() => setNotice(""), 2200)
   }
 
   function deleteProduct(productId: string) {
-    setProducts((current) => current.filter((product) => product.id !== productId))
+    removeProduct(productId)
     setMenuId(null)
     setNotice("商品已删除")
     window.setTimeout(() => setNotice(""), 2200)
@@ -73,7 +67,7 @@ export function ProductLibraryDemo() {
           <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-[26px] font-black tracking-[-0.04em] text-[#171a16]">商品</h1>
-              <p className="mt-1.5 text-[12px] text-[#7f867b]">集中管理已确认商品，在创作流程中直接选择和复用。</p>
+              <p className="mt-1.5 text-[12px] text-[#7f867b]">集中管理商品，在创作流程中直接选择和复用。</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <label className="relative min-w-[230px] flex-1 sm:flex-none">
@@ -84,9 +78,11 @@ export function ProductLibraryDemo() {
             </div>
           </header>
 
-          <div className="mt-7 flex items-center justify-between border-b border-[#eceee9] pb-3">
-            <p className="text-[13px] font-extrabold text-[#2d322b]">商品列表 <span className="ml-1 font-semibold text-[#9aa096]">{filteredProducts.length}</span></p>
-            <p className="text-[11px] text-[#969c93]">点击商品可直接编辑</p>
+          <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#eceee9] pb-3">
+            <div className="flex items-center gap-3">
+              <p className="text-[13px] font-extrabold text-[#2d322b]">商品列表 <span className="ml-1 font-semibold text-[#9aa096]">{filteredProducts.length}</span></p>
+            </div>
+            <p className="text-[11px] text-[#969c93]">默认按更新时间倒序 · 点击商品可编辑</p>
           </div>
 
           <section className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(185px,1fr))] gap-x-4 gap-y-6 xl:grid-cols-5 2xl:grid-cols-6">
@@ -145,6 +141,7 @@ function ProductListCard({ product, menuOpen, onMenu, onEdit, onDelete }: { prod
       <button type="button" onClick={onEdit} className="mt-2 block w-full text-left">
         <span className="block truncate text-[12px] font-extrabold text-[#252a23]">{product.name}</span>
         <span className="mt-0.5 block truncate text-[10.5px] text-[#92988f]">{product.brand || "未填写品牌"}</span>
+        <span className="mt-2 block truncate text-[9.5px] font-semibold text-[#a0a69d]">更新于 {formatProductUpdatedAt(product.updatedAt)}</span>
       </button>
     </article>
   )

@@ -25,7 +25,7 @@ const KIND_TO_TASK_INDEX: Record<TaskKind, number> = {
 const STEP0_COPY: Record<TaskKind, { title: string; desc: string }> = {
   report:   { title: "你的第一份报告已生成！", desc: "我们已把它放进「任务结果」。点这张卡打开看看。" },
   video:    { title: "你的第一条 30s 视频已生成！", desc: "我们已把它放进「任务结果 · 生成结果」。点这张卡打开看看。" },
-  brief:    { title: "Brief 已经准备好", desc: "我们已把它放进「任务结果 · Brief 结果」。点这张卡打开看看。" },
+  brief:    { title: "创意脚本已经准备好", desc: "我们已把它放进「任务结果 · 脚本结果」。点这张卡打开看看。" },
   analysis: { title: "分析报告已出", desc: "我们已把它放进「任务结果 · 分析结果」。点这张卡打开看看。" },
 }
 
@@ -40,7 +40,7 @@ function fillKeyOf(m: ModeId): keyof ChatPrefill {
   return m
 }
 
-export function AssistantPageContent() {
+export function AssistantPageContent({ initialMode }: { initialMode?: ModeId }) {
   const {
     state,
     isNewUser,
@@ -56,11 +56,11 @@ export function AssistantPageContent() {
     reset,
   } = useOnboardingState()
 
-  const [mode, setMode] = useState<ModeId>("report")
+  const [mode, setMode] = useState<ModeId>(initialMode ?? "report")
   const [prefill, setPrefill] = useState<ChatPrefill>({})
 
   // 新用户：默认只看 4 卡，点卡后揭示 chat box
-  const [revealed, setRevealed] = useState(false)
+  const [revealed, setRevealed] = useState(Boolean(initialMode))
 
   const [submitting, setSubmitting] = useState(false)
   const [spotlightKind, setSpotlightKind] = useState<TaskKind | null>(null)

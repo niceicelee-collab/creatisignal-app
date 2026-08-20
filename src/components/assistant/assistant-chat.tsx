@@ -13,7 +13,7 @@ import { GenerateMode } from "./modes/generate-mode"
 const modes = [
   { id: "report", label: "创意Report", icon: FileText },
   { id: "analysis", label: "创意分析", icon: BarChart2 },
-  { id: "brief", label: "创意 brief", icon: BookOpen },
+  { id: "brief", label: "创意脚本", icon: BookOpen },
   { id: "generate", label: "创意生成", icon: Sparkles },
 ] as const
 
