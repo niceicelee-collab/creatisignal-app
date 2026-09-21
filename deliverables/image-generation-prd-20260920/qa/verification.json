@@ -1,0 +1,61 @@
+{
+  "scope": "独立交互原型，非生产应用测试",
+  "checks": [
+    {
+      "check": "视频3条总价450积分",
+      "pass": true
+    },
+    {
+      "check": "图片默认Wan3.0/1K/1张及四档数量",
+      "pass": true
+    },
+    {
+      "check": "GPT Image 2.5/2K/3张24积分，无子型号",
+      "pass": true
+    },
+    {
+      "check": "Wan3.0/4K/4张16积分",
+      "pass": true
+    },
+    {
+      "check": "切回视频恢复1条且无4条",
+      "pass": true
+    },
+    {
+      "check": "图片草稿保留4K和4张",
+      "pass": true
+    },
+    {
+      "check": "资产图片筛选4项且无视频结果",
+      "pass": true
+    },
+    {
+      "check": "资产图片与名称搜索取交集",
+      "pass": true
+    },
+    {
+      "check": "图片结果可打开大图预览",
+      "pass": true
+    },
+    {
+      "check": "资产筛选无结果显示图片空态",
+      "pass": true
+    },
+    {
+      "name": "全部任务与图片二级筛选返回5个图片任务",
+      "pass": true
+    },
+    {
+      "name": "切换创意报告后二级重置禁用且报告显示",
+      "pass": true
+    },
+    {
+      "name": "创意生成与视频筛选返回4个任务",
+      "pass": true
+    },
+    {
+      "name": "任务二级筛选与名称搜索取交集",
+      "pass": true
+    }
+  ]
+}

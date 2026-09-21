@@ -1,0 +1,12 @@
+{
+  "docx": "TikTok发帖_产品需求文档_V1.1.docx",
+  "word_render_engine": "WPS read-only export",
+  "rendered_pages": 19,
+  "editable_tables": 9,
+  "embedded_prototypes": 10,
+  "source_links": 7,
+  "package_files": 14,
+  "docx_sha256": "5092d7b6d4610babf88ac5c1ef423bf24eb08d34f4c0365ae693b506b26decb0",
+  "zip_sha256": "fe58c1353fa749b2113d2ef7a600414e645f626bff78fd4bf9fdfb0f4c6e7331",
+  "checks": "passed"
+}

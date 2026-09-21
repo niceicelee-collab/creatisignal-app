@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import * as Popover from "@radix-ui/react-popover"
 import { Check, ChevronDown, Plus, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { selectWorkspace, useWorkspaceId } from "@/lib/discovery/curated-state"
 
 type Project = {
   id: string
@@ -27,13 +28,13 @@ function avatarColor(name: string): string {
 
 export function ProjectSwitcher() {
   const [open, setOpen] = useState(false)
-  const [active, setActive] = useState<Project>(PROJECTS[0])
+  const workspaceId = useWorkspaceId()
+  const active = PROJECTS.find((project) => project.id === workspaceId) ?? PROJECTS[0]
   const [query, setQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (open) {
-      setQuery("")
       window.setTimeout(() => inputRef.current?.focus(), 60)
     }
   }, [open])
@@ -43,7 +44,7 @@ export function ProjectSwitcher() {
   )
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={(value) => { setOpen(value); if (value) setQuery("") }}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -90,7 +91,7 @@ export function ProjectSwitcher() {
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => { setActive(p); setOpen(false) }}
+                    onClick={() => { selectWorkspace(p.id); setOpen(false) }}
                     className={cn(
                       "w-full px-2 py-1.5 rounded-md flex items-center gap-2.5 cursor-pointer text-left transition-colors",
                       isActive ? "bg-[var(--soft)]" : "hover:bg-[var(--soft-2)]"

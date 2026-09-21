@@ -1,0 +1,6 @@
+{
+  "pages": 11,
+  "render_method": "WPS native Office PDF export after canonical renderer unavailable due to missing bundled LibreOffice",
+  "visual_review": "All 11 pages inspected",
+  "page_bounds_overflow": []
+}

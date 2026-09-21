@@ -1,0 +1,558 @@
+[
+  {
+    "index": 1,
+    "label": "男装-Polo",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\男装-Polo",
+    "info": "1. 商品名称：Golf Shirts for Men Dry Fit Short Sleeve Print Performance Moisture Wicking Polo Shirt\n2. 商品描述：\n- PERFORMANCE MATERIAL: This mens golf shirts short sleeve made from Polyester Spandex, lightweight, moisture wicking, quick dry, UPF 30+, soft hand-feel, 4 way stretch, comfortable and breathable keep you cool.\n- SIZE: This mens polo shirts short sleeve based on US regular fit: S, M, L, XL, XXL, 3XL. Allowing for great mobility in any directions yet they still have a fitted look.\n- OCCASION: Our sport polo shirts for men dry fit, perfect for golf, tennis and other outdoor sport activities, also for casual everyday. A great gift for families, friends or boyfriends!\n- STYLE FEATURE: This golf polo for men use allover print stretch fabric with easy care and keep good shape, well-made stitching.\n- WARM TIPS: Our polyester men polo shirts The model is 5'11\"height, 172lbs wearing a size Medium for reference. Please refer to the size chart in product image or description before you order it. Click our store on top to view more our mens polos.",
+    "model": "Theo",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\男装-Polo\\1.png",
+        "size": [
+          1254,
+          1254
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\男装-Polo\\2.png",
+        "size": [
+          1254,
+          1254
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\男装-Polo\\3.png",
+        "size": [
+          1254,
+          1254
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\男装-Polo\\4.png",
+        "size": [
+          1024,
+          1536
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\01_product_refs.jpg"
+  },
+  {
+    "index": 2,
+    "label": "女装-礼裙",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-礼服",
+    "info": "1. 商品名称：Ubaldo Lace Sleeveless Slit Midi Dress\n2. 商品描述：\nMaterial: 95% Polyester, 5% Spandex\nEffortless elegance meets modern sophistication with the Ubaldo Lace Sleeveless Slit Midi Dress. The high slit adds movement and allure, while the midi length ensures timeless versatility. Whether you're heading to an evening event or a sophisticated brunch, this dress transitions seamlessly from day to night. The breathable fabric offers comfortable wear all day long, making it an essential piece for your wardrobe.\n",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-礼服\\1.png",
+        "size": [
+          995,
+          1260
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-礼服\\2.png",
+        "size": [
+          847,
+          1278
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-礼服\\3.png",
+        "size": [
+          671,
+          1260
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-礼服\\4.png",
+        "size": [
+          755,
+          1254
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\02_product_refs.jpg"
+  },
+  {
+    "index": 3,
+    "label": "女装-内衣",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-内衣",
+    "info": "1. 商品名称：SHAPERX Shapewear for Women Tummy Control Bodysuit Mid Thigh Body Shaper Shorts for a Lifted Look\n2. 商品描述：\n- Follow our size chart and measure your bust, waist, and hips. You may be surprised by how “tiny” the bodysuit looks during your first try-on. But don’t worry—the bodysuit is purposely designed with super-stretchy fabric to hug you in all the right places!\n- This seamless shapewear helps hold in your core, lift your chest, and smooth your abdomen. Its whisper-soft, seamless construction makes this shaper a must-have for enhancing your natural curves.\n- This bodysuit is made of high-quality fabric containing 78% nylon and 22% spandex. It is lightweight, stretchy, and skin-friendly. The bust and bottom areas feature breathable mesh material for easy, comfortable all-day wear.\n- This shaper features a soft, no-padding bra design for natural support without squeezing the bust. Adjustable straps help fit most cup sizes, full back coverage smooths the upper back, and the open gusset allows easy bathroom use.\n- Occasion: This shapewear stays invisible under daily clothes thanks to its seamless finish and light color. It pairs easily with shorts, low-cut tops, skirts, dresses, and more. Suitable for office, daily wear, parties, weddings, travel, and other occasions.",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-内衣\\1.png",
+        "size": [
+          986,
+          1595
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-内衣\\2.png",
+        "size": [
+          987,
+          1593
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-内衣\\3.png",
+        "size": [
+          986,
+          1594
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-内衣\\4.png",
+        "size": [
+          1027,
+          1531
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\03_product_refs.jpg"
+  },
+  {
+    "index": 4,
+    "label": "女装-牛仔裤",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-牛仔裤",
+    "info": "商品名称：Trendy Queen Women High Waisted Straight Wide Leg Jeans Stretch Baggy Pants\n商品描述：\n- Comfortable High-Stretch Fabric: Made from a blend of 70% Cotton, 28% Polyester, and 2% Spandex. This soft fabric offers remarkable stretch, balancing cotton's breathability with spandex's freedom of movement. Durable and resistant to deformation, suitable for all seasons\n- High Waisted Straight Leg Silhouette: The high-rise waist combined with a relaxed straight-leg cut flatters your waistline and legs. Classic button fly and functional front/back pockets create a simple, vintage-inspired casual style\n- Versatile Style Combinations: Pairs perfectly with crop tops, tees, blouses, or knits for Y2K retro, minimalist, or street-style looks. Versatile with sneakers or boots, serving as a core piece for daily styling inspiration\n- Multi-Scenario Wearability: Suitable for various occasions like daily casual, campus, office, shopping, travel, and gatherings. Its comfort and style meet all-day dressing needs from home to outings\n- Easy Care Instructions: Machine wash cold or hand wash separately. Do not bleach, tumble dry, or dry clean. Air dry to maintain shape. Please consult the size chart for the best fit\n",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-牛仔裤\\1.jpg",
+        "size": [
+          372,
+          741
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-牛仔裤\\2.jpg",
+        "size": [
+          556,
+          741
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-牛仔裤\\3.jpg",
+        "size": [
+          556,
+          741
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\女装-牛仔裤\\4.jpg",
+        "size": [
+          556,
+          741
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\04_product_refs.jpg"
+  },
+  {
+    "index": 5,
+    "label": "儿童-连体睡衣",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\儿童-连体睡衣",
+    "info": "1. 商品名称：O2 BABY Baby Boys Girls Organic Cotton Zip-Front Sleeper Pajamas, Footed Sleep 'n Play\n2. 商品描述：\n- Made of 100% organic cotton fabric. Award-winning soft sleeper PJs, comfortable and breathable for baby’s sensitive skin，perfect onesie for any occasion\n- Carefully designed for safety, zipper garage and zipper guard protects delicate skin\n- Zip up style for easy dressing and diaper changes\n- Superior quality makes it an ideal gift for every little baby\n- Machine wash with cold water\n",
+    "model": "无，自动生成婴儿形象",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\儿童-连体睡衣\\1.png",
+        "size": [
+          519,
+          960
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\儿童-连体睡衣\\2.png",
+        "size": [
+          655,
+          664
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\儿童-连体睡衣\\3.png",
+        "size": [
+          679,
+          452
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\儿童-连体睡衣\\4.png",
+        "size": [
+          679,
+          662
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\05_product_refs.jpg"
+  },
+  {
+    "index": 6,
+    "label": "服装-鞋靴",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\服装-鞋靴",
+    "info": "1. 商品名称：Skechers Men's Slip-Ins: Go Walk Flex Hands Up\n2. 商品描述：\n- Skechers Hands Free Slip-Ins for an easy fit\n- Lightweight, responsive ULTRA GO cushioning\n- Skechers Air-Cooled Memory Foam cushioned comfort insole\n- Breathable mesh upper with elastic bungee laces, functions as a slip on\n- Machine washable, air dry\n",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服装-鞋靴\\1.png",
+        "size": [
+          778,
+          320
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服装-鞋靴\\2.png",
+        "size": [
+          695,
+          1934
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服装-鞋靴\\3.png",
+        "size": [
+          695,
+          444
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\06_product_refs.jpg"
+  },
+  {
+    "index": 7,
+    "label": "服装-箱包",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\服饰-箱包",
+    "info": "1. 商品名称：BAGSMART Tote Bag for Women, Puffer Tote Bag for Work Large Shoulder Bag\n2. 商品描述：\n- The Trend Era of Puffer Bag is Approaching: \"A puffer bag can effortlessly complement various outfits,\" says Brenda Iris, image consultant, stylist, and founder of Mindful Styling in Minneapolis, Minnesota\n- Spacious & Smart Organization: 20L large capacity with multiple pockets to keep everything tidy. Includes a dedicated 15.6\" laptop compartment, front zipper pocket, and interior water bottle holder. Perfect for travel, work, and daily commute\n- Ultra Light and Soft Materials: Weighs only 0.97 pounds. Made of durable, soft and light taslan fabric. The puffer tote bag is easy to carry. Good choice of travel bag.. Also a reliable, functional, and fashionable handbag. Efinitely an ideal gift for yourself, your family, and your friend.\n- Easy to Use: The soft handle enhances the user's sense of use, whether it's a handbag or a shoulder bag, you won't feel too much pressure. Puffy material is not only designed for a beautiful appearance, but also effectively protects built-in electronic devices or other fragile items\n- Anywhere You Go: From office meetings to beach days—this bag fits your every move. Versatile design works as a laptop bag, work bag, teacher bag, nurse bag, gym tote, shoulder bag, purses for women, handbags for women, travel tote or beach tote. A thoughtful gift for modern women",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服饰-箱包\\1.png",
+        "size": [
+          679,
+          741
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服饰-箱包\\2.png",
+        "size": [
+          679,
+          841
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服饰-箱包\\3.png",
+        "size": [
+          679,
+          843
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\服饰-箱包\\4.png",
+        "size": [
+          679,
+          881
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\07_product_refs.jpg"
+  },
+  {
+    "index": 8,
+    "label": "时尚-珠宝",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\时尚-珠宝",
+    "info": "1. 商品名称：OOOPEL Large Thin Double Hoop Earrings for Women Lightweight Hypoallergenic 925 Sterling Silver Post 14K Gold Hoops Non Tarnish Sturdy Big Thin Double Layered Hoop Earrings 30/40/50/60mm\n2. 商品描述：\n- 【Large Thin Gold Hoop Earrings】Our unique large double hoops earrings for women add a sense of layering compared to ordinary single thin hoop earrings, making them more eye-catching and decorate the face shape. And the secure clip-top design makes 14k gold hoop earrings for women super easy and comfortable to put on and take off.\n- 【High-Quality Materials】These gold thin hoop earrings are made of high-quality copper and 14k real gold plated on the surface, nickel & lead free, and hypoallergenic, sensitive ear health. And high process welding treatment makes the connection points of the double circle very sturdy and not easily deformed by compression.\n- 【Lightweight Big Hoop Earrings】Our double layer large hoop earrings come in a variety of sizes：30/40/50/60MM, so you can choose the one that best suits you for your personal style. At the same time, the large double hoop earring can not only decorate the face shape, but also each pair of gold hoops thin weighs less than 12g, making them more suitable for long-term wear.\n- 【Prefect Gift】The double large hoop earrings feature a classic and minimalist glossy design, which can be matched with most of your outfits and suitable for wearing on various occasions. All big gold hoop earrings 14k real gold are packaged in a beautiful box, providing excellent jewelry gifts for your family on Birthday, Christmas, Mother's Day, anniversary celebrations etc.\n- 【OOOPEL Service】 We provide you with high-quality gold hoops large and excellent service. If you have any questions about the hoop earings you received, let us known at any time, we will provide you with a perfect solution within 24 hours.",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\时尚-珠宝\\1.png",
+        "size": [
+          539,
+          695
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\时尚-珠宝\\2.png",
+        "size": [
+          695,
+          695
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\时尚-珠宝\\3.png",
+        "size": [
+          695,
+          695
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\时尚-珠宝\\4.png",
+        "size": [
+          695,
+          695
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\08_product_refs.jpg"
+  },
+  {
+    "index": 9,
+    "label": "美妆-唇油",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\美妆-唇油",
+    "info": "1. 商品名称：Maybelline Lifter Gloss, Hydrating Lip Gloss with Hyaluronic Acid, High Shine for Plumper Looking Lips, Stone, Rosey Neutral, 0.18 Ounce\n2. 商品描述：\n- Lifter Gloss with Hyaluronic Acid: Lifter Gloss in Stone, a rosey nude cream shade, features hyaluronic acid to visibly smooth lip surface & enhance lip contour. Drench lips with this high shine lip gloss for hydrated, fuller looking lips\n- Next Level Shine: Transform your lips in one easy swipe with the XL wand applicator that evenly dispenses the Lifter Gloss into a smooth, super- shiny finish. Find your ideal Maybelline lip gloss in our full range of modern shades\n- Let Your Lips Do The Talking: This tinted lip gloss adds gorgeous color and a non sticky, glossy shine to your lips, leaving them feeling plump and moisturized. Available in 20 hydrating shades\n- Explore Your Creativity: We're committed to celebrating beauty, self-expression and creativity with our full line of makeup, from foundations, bb creams, concealers and bronzers to mascaras, brow pencils, eyeliners and lipstick\n- Maybelline New York: The number 1 makeup brand for every look, style and skin tone; We combine technologically advanced formulations with on-trend expertise and New York City edge; Diverse, on the pulse, inspired by the city and tested on its streets\n",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\美妆-唇油\\1.png",
+        "size": [
+          1280,
+          1279
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\美妆-唇油\\2.png",
+        "size": [
+          1500,
+          1500
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\美妆-唇油\\3.png",
+        "size": [
+          1280,
+          1280
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\09_product_refs.jpg"
+  },
+  {
+    "index": 10,
+    "label": "美妆-美甲",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\美妆-美甲",
+    "info": "1. 商品名称：Mr.wish 7-in-1 Cherry Shimmer Cat Eye Nail Gel Pen Kit - 1-Step Lazy Magnetic Polish for Beginner DIY Home Use, Lightwei\n2. 商品描述：\nTwist the pen end roughly 10 times until gel flows to the brush tip Apply one smooth thin layer on clean bare nails, avoid smearing onto cuticles Grab the included hoop magnet to swirl and craft your ideal cat eye light streak Cure nails under the matching mini straight LED lamp: light shades 60 seconds, deep dark shades 120 seconds Perfect for absolute beginners; simple operation to paint both hands solo Mild, skin & nail safe gentle gel formula Entire compact set for travel, quick nail fixes w",
+    "model": "Maya",
+    "images": []
+  },
+  {
+    "index": 11,
+    "label": "健康-保健品",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\健康-保健品",
+    "info": "1. 商品名称：Apple Cider Vinegar Gummies Zero Sugar - Max Strength ACV Gummy Vitamins - Vitamin B12 & The Mother - Metabolism & Energy Support - Vegan Apple Cider Vinegar Gummy Supplement - Non-GMO - 120 Gummies\n2. 商品描述：\n- ZERO SUGAR APPLE CIDER VINEGAR: These Apple Cider Vinegar gummies deliver max strength ACV with vitamin B12 in a tasty vegan chew; Made as sugar free apple cider vinegar gummies, they support daily metabolism and energy routines without added sugar\n- MADE WITH THE MOTHER: Our Apple Cider Vinegar gummies sugar free formula includes ACV with the Mother for clean daily wellness; These ACV gummies sugar free are Non-GMO, vegan, and crafted for adults who prefer gummies over liquid vinegar\n- VEGAN DAILY GUMMIES: Enjoy ACV gummies with the mother in convenient chewable form; These Apple Cider Vinegar gummies with the mother are zero sugar ACV gummies and zero sugar Apple Cider Vinegar gummies for simple everyday support\n- TRUSTED FORMULA: Our Vegan Apple Cider Vinegar gummies supplement is formulated and manufactured following strict cGMP guidelines; Our vegan ACV gummies are third party tested to assure the quality and purity of each batch\n- APPLE CIDER VINEGAR ACV GUMMIES BY HEALTH NUTRITION NATURALS: Made with The Mother, B12, and folate for daily metabolism and energy support; Vegan, sugar free, keto-friendly gummy vitamins for women and men; zero sugar chewable supplement alternative to capsules or pills, with vinagre de manzana nutrition in easy gomitas",
+    "model": "Theo",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\健康-保健品\\1.png",
+        "size": [
+          1280,
+          1219
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\健康-保健品\\2.png",
+        "size": [
+          891,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\健康-保健品\\3.png",
+        "size": [
+          1280,
+          1272
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\11_product_refs.jpg"
+  },
+  {
+    "index": 12,
+    "label": "厨房用品-手压蔬菜切丁器",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\厨房用品-手压蔬菜切丁器",
+    "info": "1. 商品名称：Mueller Pro-Series All-in-One, 12 Blade Mandoline Slicer for Kitchen\n2. 商品描述：\n- Meal Prep MVP - A practical and innovative way to dice, slice, julienne, grate or spiralize your vegetables and fruits. With the Ultimate Chopper/Slicer & Spiralizer, preparing your favorite dishes for your whole family is no longer a chore. Made with premium materials like grade 420 stainless steel blades and food-grade bpa-free materials, it's the perfect tool to make home cooked meals easier and faster.\n- 12 Diverse Blades - With nine interchangeable blades, the vegetable chopper offers the functionality of multiple kitchen tools all in one, unique kitchen gadget with a bonus adjustable Spiralizer for extra versatility. Make use of the 3 blade options of the Spiralizer for colorful veggie pasta, shapely salads, and gorgeous garnishes. The high-quality 2mm stainless steel slicer will create perfectly chopped onions, tomatoes, and peppers for salsa, or slice cabbage for coleslaw in no time.\n- Innovative Design - Free-up countertop space with the Food Container. Use the Food Holder while cutting small vegetables and fruits. This prevents food from slipping while slicing it. It also makes it clean, safe, and easy to work with. No more hassles of washing and wiping. Dismantle it and just put it in dishwasher. Cleans easily in minutes with the complementary scrubbing fork. Its compact size allows you to store it almost anywhere.\n- Improves Your Health And Saves Time – Busy lifestyles make us fall into the fast-food trap. It can take a lot of time and effort to dice, chop and slice the ingredients of a desired dish. Do not despair. Our multi-functional tool makes this process less time-consuming making it easier to add vegetables to your meals. That being said, you’re less likely to reach for unhealthy options. From now on, enjoy having more time for your family without missing out on any of the important nutrition.\n- Live Customer Care – Talk to us via out toll-free number or live chat, not by email like our competitors. Mueller believes in making life easier, better and more enjoyable in all that we do. Our unparalleled 24/7 live telephone customer support is ready and waiting to assist with anything you need!",
+    "model": "Maya",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\厨房用品-手压蔬菜切丁器\\1.png",
+        "size": [
+          1280,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\厨房用品-手压蔬菜切丁器\\2.png",
+        "size": [
+          1253,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\厨房用品-手压蔬菜切丁器\\3.png",
+        "size": [
+          1280,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\厨房用品-手压蔬菜切丁器\\4.png",
+        "size": [
+          1280,
+          1280
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\12_product_refs.jpg"
+  },
+  {
+    "index": 13,
+    "label": "五金-无线电动螺丝刀（12批头套装）",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\五金-无线电动螺丝刀（12批头套装）",
+    "info": "1. 商品名称：SKIL Twist 2.0 Rechargeable 4V Screwdriver with Pivoting Head, Torque Setting, USB-C Charging Cable, 28 PC Bit Set & Carrying Case- SD5619-02\n2. 商品描述：\n- PIVOTING HEAD WITH LOCK OFF - Pivots and locks between three positions (0, 22.5, and 45 degrees) for improved ergonomics in tight spaces\n- TORQUE SETTING CONTROL - Adapt to the application at hand with three torque settings\n- FORWARD & REVERSE TRIGGER BUTTON - Conveniently located for easy one-finger use\n- LED LIGHT - For added visibility in low light conditions\n- INTEGRATED BATTERY WITH USB-C CHARGING PORT - For convenience and ease of use\n- 4V CORDLESS SCREWDRIVER KIT - Set includes the power screwdriver, a USB-A to USB-C charging cable, and 28-piece bit set with a plastic case",
+    "model": "Theo",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\五金-无线电动螺丝刀（12批头套装）\\1.png",
+        "size": [
+          1280,
+          1128
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\五金-无线电动螺丝刀（12批头套装）\\2.png",
+        "size": [
+          1280,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\五金-无线电动螺丝刀（12批头套装）\\3.png",
+        "size": [
+          1280,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片4",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\五金-无线电动螺丝刀（12批头套装）\\4.png",
+        "size": [
+          1280,
+          1280
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\13_product_refs.jpg"
+  },
+  {
+    "index": 14,
+    "label": "数码-键盘",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\数码-键盘",
+    "info": "1. 商品名称：iLovBee B75 Wireless Mechanical Keyboard with Knob, Linear Switch, White\n2. 商品描述：\n- 75% Wireless Keyboard – The PC gaming keyboard supports Bluetooth, 2.4GHz wireless, and USB-C wired connections. With its 75% layout, this RGB mechanical keyboard combines number keys, function keys, and arrow keys into a compact design, offering full functionality while saving desk space for your mouse\n- Keyboard with Knob – Adjusting volume has never been easier! The wireless gaming keyboard features a detachable volume knob, allowing for instant control without interrupting gameplay. Prefer a standard layout? Simply swap it for an ‘End’ key to suit your needs, giving you ultimate flexibility\n- Gasket Mount Keyboard – Designed for a smooth, even typing experience. This 75 percent keyboard features a gasket mount, leaf spring technology, and 5 layers of sound-dampening foam to reduce hollow sounds, delivering a crisp yet smooth typing sound. Ideal for gamers or typists who value performance and comfort\n- Hot Swappable Linear Switches – Featuring Azure linear switches with a 1.2mm short pre-travel, this hot-swappable mechanical keyboard delivers a creamy, responsive typing feel. Moreover, the PCB supports 3/5-pin switches, allowing you to create a truly personalized gaming setup\n- Custom Keyboard & Driver Support – Brighten your setup with customizable RGB. This wireless ergonomic keyboard features south-facing LEDs and 24 RGB lighting effects for vibrant lighting. Easily adjust RGB, key mapping, and macros with iLovbee software on Windows for a personalized experience\n- Long Lasting Wireless Mechanical Keyboard – Stay powered for extended gaming.This 75% keyboard offers low-latency 2.4G wireless and Bluetooth connectivity, allowing up to 3 devices to connect at the same time in BT mode. The 3150mAh rechargeable battery provides up to 260 hours of use with RGB off, ensuring long gaming or work sessions",
+    "model": "Theo",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\数码-键盘\\1.png",
+        "size": [
+          1280,
+          584
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\数码-键盘\\2.png",
+        "size": [
+          1500,
+          1500
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\数码-键盘\\3.png",
+        "size": [
+          1280,
+          1280
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\14_product_refs.jpg"
+  },
+  {
+    "index": 15,
+    "label": "汽车-便携无线轮胎充气泵",
+    "folder": "C:\\Users\\ice.li\\Desktop\\CS-3\\汽车-便携无线轮胎充气泵",
+    "info": "1. 商品名称：AstroAI L7 Tire Inflator Portable Air Compressor,150 PSI Cordless Bike Pump\n2. 商品描述：\n- ADVANCED TRUEGAUGE SCREEN: This battery tire inflator includes updated sensor technology, capable of collecting pressure data from tire inflators at a frequency of 200 times per second. Its valid data rate is higher than 80%, which is 60% better than the market average. From routine maintenance to roadside emergencies, its accurate readings ensure confident pressure checks and a safer driving experience.Suitable as a Father's Day gift for your dad.\n- EASY TO USE: You can choose 4+N smart modes (car, motorcycle, bicycle, ball, and custom) and 4 pressure units (PSI, Bar, kPa, kg/cm²) to preset based on your inflation needs. The custom mode allows you to freely preset the desired pressure value (3-150PSI) based on the inflatables you want to inflate. A must-have for outdoor activities and road trips, the L7 is a practical car lovers gift for men and women who have everything.\n- COMPACT, FASTER INFLATION: Weighing less than 1 pound, this portable tire inflator is easy to carry and store in any limited space, such as cars, bike racks, or backpacks. It's suitable as a car accessories gift for men or women. The compressor's 150PSI maximum pressure, it can refill a 195/65R15 tire from 30 to 36PSI in just 1.5 minutes.(Note: After 15 minutes of continuous use, allow the unit to rest for 10 minutes.)\n- LONG RUNTIME & AUTO-OFF: After fully charging, the built-in 4000mAh large-capacity battery allows the car tire pump to refill up to 8 tires (195/65R15) from 30 to 36PSI. The preset function and auto-off function deliver a hands-free inflation experience, making it user-friendly for beginners and experienced users alike. With just one press, the cordless bike tire pump will easily inflate car tires, motorcycle tires, bicycle tires (700 × 23C/700 × 38C/29 × 2.25), e-bike tires, balls, and more.(Note: Not suitable for tires larger than 25 inches, such as heavy-duty truck tires.)\n- VERSATILE EMERGENCY TOOL: The bike pump can be used as more than an air pump, it is also a multifunctional emergency tool gift for mom and dad. The flashlight on the top has 3 modes (flashlight, SOS, and strobe) to illuminate the night for easy operation. The air compressor is equipped with USB-C and USB input/output ports, providing backup power for your phones and other electronic devices. (Note: Use a 5V/1A USB power adapter for charging. If overheat protection activates, the inflator cannot be charged until it cools for 10 minutes.)",
+    "model": "Theo",
+    "images": [
+      {
+        "reference": "@图片1",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\汽车-便携无线轮胎充气泵\\1.png",
+        "size": [
+          1244,
+          1280
+        ]
+      },
+      {
+        "reference": "@图片2",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\汽车-便携无线轮胎充气泵\\2.png",
+        "size": [
+          835,
+          851
+        ]
+      },
+      {
+        "reference": "@图片3",
+        "path": "C:\\Users\\ice.li\\Desktop\\CS-3\\汽车-便携无线轮胎充气泵\\3.png",
+        "size": [
+          984,
+          1280
+        ]
+      }
+    ],
+    "preview": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\cs3_qa\\15_product_refs.jpg"
+  }
+]

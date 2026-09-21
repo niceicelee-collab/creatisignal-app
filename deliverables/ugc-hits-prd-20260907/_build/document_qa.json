@@ -1,0 +1,212 @@
+[
+  {
+    "page": 1,
+    "title": "UGC爆款产品需求文档",
+    "bottom": 1026.03125,
+    "available": 1069.828125,
+    "overflow": false
+  },
+  {
+    "page": 2,
+    "title": "核心用户场景与主链路",
+    "bottom": 874.8125,
+    "available": 1069.828125,
+    "overflow": false
+  },
+  {
+    "page": 3,
+    "title": "内容定义与入选标准",
+    "bottom": 992.5,
+    "available": 1069.828125,
+    "overflow": false
+  },
+  {
+    "page": 4,
+    "title": "每日供给与公共浏览规则",
+    "bottom": 980.578125,
+    "available": 1069.828125,
+    "overflow": false
+  },
+  {
+    "page": 5,
+    "title": "功能清单与优先级",
+    "bottom": 975.21875,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 6,
+    "title": "F01 导航入口与视频列表",
+    "bottom": 951.984375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 7,
+    "title": "F02 筛选与排序",
+    "bottom": 971.421875,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 8,
+    "title": "F03 连续刷与浏览进度",
+    "bottom": 1009.90625,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 9,
+    "title": "F04 素材详情与外部链接",
+    "bottom": 1006.890625,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 10,
+    "title": "F05 收藏到我的资产",
+    "bottom": 1006.890625,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 11,
+    "title": "F06 下载素材",
+    "bottom": 1019.34375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 12,
+    "title": "F07 一键复刻",
+    "bottom": 1036.28125,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 13,
+    "title": "F08 异常状态与内容反馈",
+    "bottom": 997.1875,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 14,
+    "title": "B01 候选池与每日概览",
+    "bottom": 969.609375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 15,
+    "title": "B02 单条审核与学习看点",
+    "bottom": 1048.421875,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 16,
+    "title": "B03 筛选排除与批量操作",
+    "bottom": 996.375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 17,
+    "title": "B04 每日编排与发布",
+    "bottom": 1039.296875,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 18,
+    "title": "B05 在架维护与反馈处置",
+    "bottom": 1041.84375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 19,
+    "title": "B06 来源账号与供给状态",
+    "bottom": 981.328125,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 20,
+    "title": "B07 内容与用户效果看板",
+    "bottom": 1001.9375,
+    "available": 1071.859375,
+    "overflow": false
+  },
+  {
+    "page": 21,
+    "title": "内容采集交付要求",
+    "bottom": 756.046875,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 22,
+    "title": "状态流转与权限边界",
+    "bottom": 899.40625,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 23,
+    "title": "数据埋点 用户行为",
+    "bottom": 797.015625,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 24,
+    "title": "数据埋点 创作与运营",
+    "bottom": 865.265625,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 25,
+    "title": "指标目标与效果验证",
+    "bottom": 898.703125,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 26,
+    "title": "每日运营流程与责任",
+    "bottom": 1038.171875,
+    "available": 1069.828125,
+    "overflow": false
+  },
+  {
+    "page": 27,
+    "title": "最小验收清单 用户端",
+    "bottom": 756.984375,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 28,
+    "title": "最小验收清单 后台与数据",
+    "bottom": 809.765625,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 29,
+    "title": "物料准备与评审分工",
+    "bottom": 950.765625,
+    "available": 1071.4375,
+    "overflow": false
+  },
+  {
+    "page": 30,
+    "title": "待确认事项与版本边界",
+    "bottom": 946.265625,
+    "available": 1071.4375,
+    "overflow": false
+  }
+]

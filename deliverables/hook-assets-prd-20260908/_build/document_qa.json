@@ -1,0 +1,184 @@
+[
+  {
+    "page": 1,
+    "title": "Hook资产产品需求文档",
+    "bottom": 912.890625,
+    "available": 1072.25,
+    "overflow": false
+  },
+  {
+    "page": 2,
+    "title": "核心用户场景与页面关系",
+    "bottom": 855.046875,
+    "available": 1072.25,
+    "overflow": false
+  },
+  {
+    "page": 3,
+    "title": "资产定义与功能优先级",
+    "bottom": 835.203125,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 4,
+    "title": "F01 爆款素材筛选与提取入口",
+    "bottom": 950.671875,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 5,
+    "title": "F02 视频上传与链接导入",
+    "bottom": 967.921875,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 6,
+    "title": "F03 结构拆解与 Hook 识别",
+    "bottom": 927,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 7,
+    "title": "F04 Hook 裁切与确认",
+    "bottom": 947.65625,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 8,
+    "title": "F05 提示词模板提炼与编辑",
+    "bottom": 927.390625,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 9,
+    "title": "F06 资产保存与版本管理",
+    "bottom": 977.359375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 10,
+    "title": "F07 Hook 资产库检索与管理",
+    "bottom": 976.96875,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 11,
+    "title": "F08 替换人物产品并生成",
+    "bottom": 927,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 12,
+    "title": "复用适配的详细规则",
+    "bottom": 739.078125,
+    "available": 1072.25,
+    "overflow": false
+  },
+  {
+    "page": 13,
+    "title": "F09 结果检查与复用记录",
+    "bottom": 957.09375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 14,
+    "title": "F10 周度热门 Hook",
+    "bottom": 1017.890625,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 15,
+    "title": "F11 素材采集与内容维护",
+    "bottom": 976.96875,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 16,
+    "title": "采集资料与更新口径",
+    "bottom": 770.859375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 17,
+    "title": "F12 使用效果看板",
+    "bottom": 957.09375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 18,
+    "title": "任务状态与恢复行为",
+    "bottom": 787.890625,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 19,
+    "title": "Hook 提取系统提示词初稿",
+    "bottom": 869.984375,
+    "available": 1070.65625,
+    "overflow": false
+  },
+  {
+    "page": 20,
+    "title": "Hook 模板输出要求与示例",
+    "bottom": 847.984375,
+    "available": 1070.65625,
+    "overflow": false
+  },
+  {
+    "page": 21,
+    "title": "数据埋点一 提取与保存",
+    "bottom": 775.828125,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 22,
+    "title": "数据埋点二 复用与热门内容",
+    "bottom": 784.53125,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 23,
+    "title": "指标口径与试点判断",
+    "bottom": 911.71875,
+    "available": 1072.25,
+    "overflow": false
+  },
+  {
+    "page": 24,
+    "title": "最小验收清单一 首期正常路径",
+    "bottom": 752.984375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 25,
+    "title": "最小验收清单二 异常与周更",
+    "bottom": 816.734375,
+    "available": 1073.328125,
+    "overflow": false
+  },
+  {
+    "page": 26,
+    "title": "评审分工与上线范围确认",
+    "bottom": 884.21875,
+    "available": 1072.25,
+    "overflow": false
+  }
+]

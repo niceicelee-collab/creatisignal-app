@@ -1,0 +1,16 @@
+{
+  "output": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\CreatiSignal_28品类_TikTok搜A_Amazon搜B_20260903.xlsx",
+  "rows": 28,
+  "independent_amazon_queries": 84,
+  "headers_and_A_columns": "UNCHANGED",
+  "A_brands_in_B_prompts_or_search_queries": 0,
+  "original_file": "UNCHANGED",
+  "sheets": [
+    "28品类案例库",
+    "使用说明",
+    "A-B匹配说明"
+  ],
+  "rendered_pages": 17,
+  "max_row_height": 215.0,
+  "checks": "PASS: content, exact order, original styles, filters, ZIP, all cell-fit checks"
+}

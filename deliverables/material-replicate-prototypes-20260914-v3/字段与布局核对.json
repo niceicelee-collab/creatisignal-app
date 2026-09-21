@@ -1,0 +1,188 @@
+{
+  "version": "V3",
+  "source": "D:/Cursor/creatisignal-app-new/deliverables/material-replicate-prototypes-20260914-v2",
+  "pages": [
+    {
+      "page": "01_拆解分析结果",
+      "removedHeading": 0,
+      "retainedTextUnchanged": true,
+      "shots": 0,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1463,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "旁白",
+              "text": "The best polo shirt set you can find.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1466,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "旁白",
+              "text": "The best polo shirt set you can find.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "02_复刻第二步_爆款拆解结果",
+      "removedHeading": 1,
+      "retainedTextUnchanged": true,
+      "shots": 2,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1208,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "口播内容",
+              "text": "The best polo shirt set",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            },
+            {
+              "label": "口播内容",
+              "text": "you can find.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1291,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "口播内容",
+              "text": "The best polo shirt set",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            },
+            {
+              "label": "口播内容",
+              "text": "you can find.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "03_复刻第四步_脚本结果",
+      "removedHeading": 1,
+      "retainedTextUnchanged": true,
+      "shots": 2,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1243,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "口播内容",
+              "text": "The ultimate performance polo with moisture wicking",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            },
+            {
+              "label": "口播内容",
+              "text": "and UPF 30+ protection.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1239,
+          "brokenImages": 0,
+          "voiceRows": [
+            {
+              "label": "口播内容",
+              "text": "The ultimate performance polo with moisture wicking",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            },
+            {
+              "label": "口播内容",
+              "text": "and UPF 30+ protection.",
+              "labelBeforeContent": true,
+              "verticalOverlap": true,
+              "singleLine": true,
+              "overflow": false,
+              "background": "rgba(0, 0, 0, 0)",
+              "border": "0px",
+              "padding": "0px"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "knownFieldsUnchanged": true,
+  "suggestions": 3,
+  "similarCreatives": 3,
+  "voiceover": {
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px",
+    "padding": "0px",
+    "shadow": "none"
+  },
+  "geometry": [
+    {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "height": 1774,
+      "brokenImages": 0
+    },
+    {
+      "width": 1366,
+      "scrollWidth": 1366,
+      "height": 1741,
+      "brokenImages": 0
+    }
+  ],
+  "placeholders": [
+    "素材名称",
+    "原视频画面",
+    "整体策略原文",
+    "目标受众原文",
+    "前三段阶段名称",
+    "前六段场景详情原文"
+  ],
+  "timeBasis": "片段时间取自用户截图的提示词反推及场景行；未知阶段名称使用占位。"
+}

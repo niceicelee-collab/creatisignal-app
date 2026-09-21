@@ -1,0 +1,27 @@
+{
+  "pdf_pages": 20,
+  "prototype_pages": [
+    2,
+    4,
+    5,
+    7,
+    8,
+    10,
+    11,
+    13,
+    15,
+    16,
+    18
+  ],
+  "png_count": 11,
+  "png_dimensions": [
+    2000,
+    1250
+  ],
+  "official_links": 6,
+  "acceptance_checks": 12,
+  "missing_font_glyphs": [],
+  "package_files": 15,
+  "zip_bytes": 5544021,
+  "visual_review": "All 20 rendered PDF pages and all 11 prototypes inspected; overlap, draft preview labels, pagination and missing glyph corrected."
+}

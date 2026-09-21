@@ -1,5 +1,6 @@
 import { Topbar } from "@/components/layout/topbar"
 import { ReportsContent, type ReportTab } from "@/components/reports/reports-content"
+import { DiscoveryTasks } from "@/components/discovery/material-flow"
 
 const VALID_TABS: ReportTab[] = ["report", "analysis", "brief", "generate"]
 
@@ -17,6 +18,7 @@ export default async function ReportsPage({
     <>
       <Topbar title="我的任务" />
       <main className="flex-1 overflow-y-auto">
+        <DiscoveryTasks kind="analysis" />
         <ReportsContent initialTab={initialTab} highlightFirst={highlightFirst} />
       </main>
     </>

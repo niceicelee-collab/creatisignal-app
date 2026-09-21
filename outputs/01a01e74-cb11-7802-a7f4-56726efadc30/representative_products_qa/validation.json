@@ -1,0 +1,63 @@
+{
+  "output": "D:\\Cursor\\creatisignal-app-new\\outputs\\01a01e74-cb11-7802-a7f4-56726efadc30\\CreatiSignal_28品类_代表商品与TikTok爆款检索_20260902.xlsx",
+  "sheets": [
+    [
+      "28品类案例库",
+      29,
+      6
+    ],
+    [
+      "使用说明",
+      16,
+      2
+    ],
+    [
+      "选品理由与来源",
+      29,
+      6
+    ]
+  ],
+  "categories": 28,
+  "industries": {
+    "服饰时尚": 7,
+    "美妆健康": 2,
+    "家居家装": 6,
+    "数码家电": 3,
+    "母婴宠物": 2,
+    "运动出行": 2,
+    "兴趣收藏": 6
+  },
+  "prompt_lengths": [
+    497,
+    496,
+    525,
+    507,
+    515,
+    516,
+    491,
+    529,
+    526,
+    451,
+    520,
+    511,
+    502,
+    494,
+    519,
+    525,
+    468,
+    544,
+    536,
+    460,
+    542,
+    506,
+    458,
+    532,
+    542,
+    458,
+    513,
+    537
+  ],
+  "preview_pages": 17,
+  "max_row_height": 215.0,
+  "checks": "PASS: exact headers, category order, complete prompts, unique products, URLs, ZIP, layout-fit, no formulas/errors"
+}

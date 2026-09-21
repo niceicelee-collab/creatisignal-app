@@ -1,0 +1,141 @@
+{
+  "version": "V2",
+  "source": "D:/Cursor/creatisignal-app-new/deliverables/material-replicate-prototypes-20260914",
+  "pages": [
+    {
+      "name": "01_拆解分析结果",
+      "title": "拆解分析结果",
+      "kind": "analysis",
+      "count": 7,
+      "unchangedIds": [
+        "strategy",
+        "audience",
+        "prompt"
+      ],
+      "visualClausesPreserved": true,
+      "timestampRows": 2,
+      "shotCount": 0,
+      "sourceVoiceover": "explicitly labeled English example, original transcript unavailable",
+      "voices": [
+        {
+          "text": "The best polo shirt set you can find.",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "padding": "0px"
+        }
+      ],
+      "stageCount": 7,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1463,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1466,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        }
+      ]
+    },
+    {
+      "name": "02_复刻第二步_爆款拆解结果",
+      "title": "爆款拆解结果",
+      "kind": "source",
+      "count": 7,
+      "unchangedIds": [
+        "strategy",
+        "audience"
+      ],
+      "visualClausesPreserved": true,
+      "timestampRows": 2,
+      "shotCount": 2,
+      "sourceVoiceover": "explicitly labeled English example, original transcript unavailable",
+      "voices": [
+        {
+          "text": "The best polo shirt set",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "padding": "0px"
+        },
+        {
+          "text": "you can find.",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "padding": "0px"
+        }
+      ],
+      "stageCount": 7,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1304,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1387,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        }
+      ]
+    },
+    {
+      "name": "03_复刻第四步_脚本结果",
+      "title": "脚本结果",
+      "kind": "script",
+      "count": 6,
+      "unchangedIds": [
+        "newStrategy"
+      ],
+      "visualClausesPreserved": true,
+      "timestampRows": 2,
+      "shotCount": 2,
+      "sourceVoiceover": "existing English script, split between two shots",
+      "voices": [
+        {
+          "text": "The ultimate performance polo with moisture wicking",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "padding": "0px"
+        },
+        {
+          "text": "and UPF 30+ protection.",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "padding": "0px"
+        }
+      ],
+      "stageCount": 6,
+      "geometry": [
+        {
+          "viewport": 1800,
+          "width": 1800,
+          "height": 1339,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        },
+        {
+          "viewport": 1366,
+          "width": 1366,
+          "height": 1335,
+          "brokenImages": 0,
+          "overflow": [],
+          "stageNamesAndTimesInline": true
+        }
+      ]
+    }
+  ]
+}

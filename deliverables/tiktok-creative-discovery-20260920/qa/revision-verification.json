@@ -1,0 +1,313 @@
+{
+  "version": "20260921-38",
+  "checks": [
+    {
+      "name": "默认显示带货精选",
+      "passed": true
+    },
+    {
+      "name": "地区筛选",
+      "passed": true
+    },
+    {
+      "name": "地区达人商品组合筛选",
+      "passed": true
+    },
+    {
+      "name": "无结果提示",
+      "passed": true
+    },
+    {
+      "name": "全部清除恢复列表",
+      "passed": true
+    },
+    {
+      "name": "AI筛选",
+      "passed": true
+    },
+    {
+      "name": "外网访问提示",
+      "passed": true
+    },
+    {
+      "name": "详情精简",
+      "passed": true
+    },
+    {
+      "name": "仅保留一个查看源视频入口",
+      "passed": true
+    },
+    {
+      "name": "达人粉丝量1万以下",
+      "passed": true
+    },
+    {
+      "name": "灵感发现不再重复素材列表",
+      "passed": true
+    },
+    {
+      "name": "带货精选恢复迁移内容",
+      "passed": true
+    },
+    {
+      "name": "GMV排序：有效估值降序、0在缺失值之前",
+      "passed": true
+    },
+    {
+      "name": "销量排序：有效估值降序、缺失值置后",
+      "passed": true
+    },
+    {
+      "name": "默认每页5条",
+      "passed": true
+    },
+    {
+      "name": "下一页展示剩余2条",
+      "passed": true
+    },
+    {
+      "name": "末页禁用下一页",
+      "passed": true
+    },
+    {
+      "name": "筛选回到第一页",
+      "passed": true
+    },
+    {
+      "name": "每页10条展示全部7条",
+      "passed": true
+    },
+    {
+      "name": "收藏页删除搜索和英文眉题",
+      "passed": true
+    },
+    {
+      "name": "新增收藏进入列表首位",
+      "passed": true
+    },
+    {
+      "name": "收藏刷新后保留",
+      "passed": true
+    },
+    {
+      "name": "收藏跨页展示",
+      "passed": true
+    },
+    {
+      "name": "末页清空自动回上一页",
+      "passed": true
+    },
+    {
+      "name": "验证后恢复原有4条收藏",
+      "passed": true
+    },
+    {
+      "name": "失效素材禁用源视频操作",
+      "passed": true
+    },
+    {
+      "name": "Custom views dropdown filters to one item",
+      "passed": true
+    },
+    {
+      "name": "Creator expanded has 30 categories",
+      "passed": true
+    },
+    {
+      "name": "Creator new taxonomy filters correctly",
+      "passed": true
+    },
+    {
+      "name": "Product expanded has 31 categories",
+      "passed": true
+    },
+    {
+      "name": "Product new taxonomy filters correctly",
+      "passed": true
+    },
+    {
+      "name": "Ten visible sample materials",
+      "passed": true
+    },
+    {
+      "name": "All card images load",
+      "passed": true
+    },
+    {
+      "name": "New sample detail contains product",
+      "passed": true
+    },
+    {
+      "name": "Replication takes selected m9",
+      "passed": true
+    },
+    {
+      "name": "Download loading UI",
+      "passed": true
+    },
+    {
+      "name": "Download returns to curated",
+      "passed": true
+    },
+    {
+      "name": "Favorite header no workspace count",
+      "passed": true
+    },
+    {
+      "name": "Original favorites preserved",
+      "passed": true
+    },
+    {
+      "name": "Favorite replication source carried",
+      "passed": true
+    },
+    {
+      "name": "Download returns to favorites",
+      "passed": true
+    },
+    {
+      "name": "Fans dropdown is not clipped",
+      "passed": true
+    },
+    {
+      "name": "Fans filter results match",
+      "passed": true
+    },
+    {
+      "name": "Keyboard dropdown selection works",
+      "passed": true
+    },
+    {
+      "name": "Default page displays ten items",
+      "passed": true
+    },
+    {
+      "name": "All 249 countries available",
+      "passed": true
+    },
+    {
+      "name": "Country search applies US filter",
+      "passed": true
+    },
+    {
+      "name": "Non popular country shows matching empty state",
+      "passed": true
+    },
+    {
+      "name": "Unmatched country search has empty state",
+      "passed": true
+    },
+    {
+      "name": "Persistent creation navigation opens download",
+      "passed": true
+    },
+    {
+      "name": "Player settings removed",
+      "passed": true
+    },
+    {
+      "name": "Favorite sorting caption remains visible",
+      "passed": true
+    },
+    {
+      "name": "Country menu Escape closes without reopening",
+      "passed": true
+    },
+    {
+      "name": "Page sizes start at ten",
+      "passed": true
+    },
+    {
+      "name": "Detail estimates match card data",
+      "passed": true
+    },
+    {
+      "name": "Visible player prototype caption removed",
+      "passed": true
+    },
+    {
+      "name": "Missing estimates display no-data labels",
+      "passed": true
+    },
+    {
+      "name": "Zero estimates remain visible",
+      "passed": true
+    },
+    {
+      "name": "Favorites uses same GMV and sales detail",
+      "passed": true
+    },
+    {
+      "name": "Replication starts with downloading state",
+      "passed": true
+    },
+    {
+      "name": "Three second simulation switches to analysis with selected material",
+      "passed": true
+    },
+    {
+      "name": "Refresh restarts download",
+      "passed": true
+    },
+    {
+      "name": "Leaving download cancels delayed transition",
+      "passed": true
+    },
+    {
+      "name": "Country options show Chinese only",
+      "passed": true
+    },
+    {
+      "name": "Country selection still filters videos",
+      "passed": true
+    },
+    {
+      "name": "Country search removed icon and AZ suffix",
+      "passed": true
+    },
+    {
+      "name": "Analysis button opens independent download page",
+      "passed": true
+    },
+    {
+      "name": "Analysis download starts with source placeholder",
+      "passed": true
+    },
+    {
+      "name": "Analysis page has no replication steps",
+      "passed": true
+    },
+    {
+      "name": "Refresh restarts analysis source download",
+      "passed": true
+    },
+    {
+      "name": "Download transitions to analysis progress automatically",
+      "passed": true
+    },
+    {
+      "name": "Source player appears after simulated download",
+      "passed": true
+    },
+    {
+      "name": "Analysis highlights task navigation",
+      "passed": true
+    },
+    {
+      "name": "Leaving download cancels delayed transition",
+      "passed": true
+    },
+    {
+      "name": "Favorite analysis carries selected material and source",
+      "passed": true
+    },
+    {
+      "name": "Favorite analysis returns to favorites",
+      "passed": true
+    },
+    {
+      "name": "Unavailable source still disables analysis",
+      "passed": true
+    }
+  ]
+}

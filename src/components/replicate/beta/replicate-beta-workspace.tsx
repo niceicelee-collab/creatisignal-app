@@ -69,6 +69,7 @@ import {
   subscribeBetaProjectNames,
 } from "@/lib/replicate/beta-project-names"
 import { cn } from "@/lib/utils"
+import { referenceBrief, referenceScript } from "@/lib/discovery/replication"
 
 type StepId = 1 | 2 | 3 | 4
 type RenderStatus = "idle" | "rendering" | "completed" | "failed"
@@ -90,12 +91,29 @@ interface VideoVersion {
   subtitles: string
 }
 
+interface ReferenceDraft {
+  step: StepId; maxStep: StepId; productName: string; brandName: string; productDescription: string
+  sellingPoints: string; scripts: typeof SCRIPT_SCENES; model: string; ratio: string; resolution: string
+  language: string; subtitles: string; videoVersions: VideoVersion[]; selectedVersionId: string
+  renderStatus: RenderStatus
+}
+function readReferenceDraft(projectId: string): ReferenceDraft | null {
+  if (typeof window === "undefined") return null
+  try {
+    const value = JSON.parse(localStorage.getItem(`creatisignal.curated-workspace.${projectId}`) || "null")
+    return value && value.step >= 2 && value.step <= 4 && Array.isArray(value.scripts) ? value : null
+  } catch { return null }
+}
+
 interface Props {
   projectId: string
   title?: string
   sourceAssetId?: string
   sourceType?: string
   uploadedSourceName?: string
+  referenceMaterial?: BetaMaterial
+  referenceProductName?: string
+  onReturnToReference?: () => void
 }
 
 interface BreakdownProduct {
@@ -528,23 +546,26 @@ function createMockVideoVersions({
   ]
 }
 
-export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, sourceType, uploadedSourceName }: Props) {
+export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, sourceType, uploadedSourceName, referenceMaterial, referenceProductName, onReturnToReference }: Props) {
+  const [referenceDraft] = useState(() => referenceMaterial ? readReferenceDraft(projectId) : null)
   const startsFromAssistant = Boolean(sourceAssetId || (sourceType === "upload" && uploadedSourceName))
   const initial = useMemo(
-    () => startsFromAssistant
+    () => referenceMaterial
+      ? { step: 2 as StepId, maxStep: 2 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: false }
+      : startsFromAssistant
       ? { step: 1 as StepId, maxStep: 1 as StepId, renderStatus: "idle" as RenderStatus, breakdownStarted: true, breakdownLoading: true }
       : getInitialState(projectId),
-    [projectId, startsFromAssistant],
+    [projectId, startsFromAssistant, referenceMaterial],
   )
   const existingProject = BETA_PROJECTS.find((project) => project.id === projectId)
-  const defaultMaterial = WORKSPACE_MATERIALS.find((material) => material.id === sourceAssetId)
+  const defaultMaterial = referenceMaterial ?? WORKSPACE_MATERIALS.find((material) => material.id === sourceAssetId)
     ?? WORKSPACE_MATERIALS.find((material) => material.id === "aigc-003")
     ?? WORKSPACE_MATERIALS[0]
   const initialDuration = Number(defaultMaterial.duration.split(":").pop()) || 20
 
-  const [step, setStep] = useState<StepId>(initial.step)
-  const [maxStep, setMaxStep] = useState<StepId>(initial.maxStep)
-  const [renderStatus, setRenderStatus] = useState<RenderStatus>(initial.renderStatus)
+  const [step, setStep] = useState<StepId>(referenceDraft?.step ?? initial.step)
+  const [maxStep, setMaxStep] = useState<StepId>(referenceDraft?.maxStep ?? initial.maxStep)
+  const [renderStatus, setRenderStatus] = useState<RenderStatus>(referenceDraft?.renderStatus === "rendering" ? "failed" : referenceDraft?.renderStatus ?? initial.renderStatus)
   const [progress, setProgress] = useState(initial.renderStatus === "completed" ? 100 : 0)
   const [sourceTab, setSourceTab] = useState(() => getInitialSourceTab(sourceType, sourceAssetId))
   const [selectedMaterialId, setSelectedMaterialId] = useState(defaultMaterial.id)
@@ -552,10 +573,10 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
   const [busy, setBusy] = useState<"analysis" | "script" | null>(null)
   const [breakdownStarted, setBreakdownStarted] = useState(initial.breakdownStarted)
   const [breakdownLoading, setBreakdownLoading] = useState(initial.breakdownLoading)
-  const [productName, setProductName] = useState("FlexForm 高支撑运动内衣")
-  const [brandName, setBrandName] = useState("FlexForm")
-  const [productDescription, setProductDescription] = useState("适合中高强度训练的高支撑运动内衣，加宽肩带与包裹式下围减少晃动。")
-  const [sellingPoints, setSellingPoints] = useState("加宽肩带分散压力\n高弹面料跟随伸展\n包裹式下围稳定承托")
+  const [productName, setProductName] = useState(referenceDraft?.productName ?? (referenceMaterial ? "" : "FlexForm 高支撑运动内衣"))
+  const [brandName, setBrandName] = useState(referenceDraft?.brandName ?? (referenceMaterial ? "" : "FlexForm"))
+  const [productDescription, setProductDescription] = useState(referenceDraft?.productDescription ?? (referenceMaterial ? "" : "适合中高强度训练的高支撑运动内衣，加宽肩带与包裹式下围减少晃动。"))
+  const [sellingPoints, setSellingPoints] = useState(referenceDraft?.sellingPoints ?? (referenceMaterial ? "" : "加宽肩带分散压力\n高弹面料跟随伸展\n包裹式下围稳定承托"))
   const [selectedTargetProductId, setSelectedTargetProductId] = useState(
     () => DETECTED_PRODUCTS.find((product) => product.primary)?.id ?? DETECTED_PRODUCTS[0].id,
   )
@@ -564,12 +585,12 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
   )
   const [digitalHuman, setDigitalHuman] = useState<DHItem | null>(null)
   const [personReplacementMode, setPersonReplacementMode] = useState<PersonReplacementMode | null>(null)
-  const [scripts, setScripts] = useState(SCRIPT_SCENES)
-  const [model, setModel] = useState("Seedance 2.0")
-  const [ratio, setRatio] = useState("9:16")
-  const [resolution, setResolution] = useState("720P")
-  const [language, setLanguage] = useState("英语")
-  const [subtitles, setSubtitles] = useState("跟随原视频")
+  const [scripts, setScripts] = useState(referenceDraft?.scripts ?? SCRIPT_SCENES)
+  const [model, setModel] = useState(referenceDraft?.model ?? "Seedance 2.0")
+  const [ratio, setRatio] = useState(referenceDraft?.ratio ?? "9:16")
+  const [resolution, setResolution] = useState(referenceDraft?.resolution ?? "720P")
+  const [language, setLanguage] = useState(referenceDraft?.language ?? "英语")
+  const [subtitles, setSubtitles] = useState(referenceDraft?.subtitles ?? "跟随原视频")
   const initialProjectTitle = title || existingProject?.title || "运动内衣承托测试 · 新版本"
   const [titleDraft, setTitleDraft] = useState(initialProjectTitle)
   const [editingTitle, setEditingTitle] = useState(false)
@@ -578,7 +599,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
     getBetaProjectNamesSnapshot,
     getBetaProjectNamesServerSnapshot,
   )
-  const [videoVersions, setVideoVersions] = useState<VideoVersion[]>(() => initial.renderStatus === "completed"
+  const [videoVersions, setVideoVersions] = useState<VideoVersion[]>(() => referenceDraft?.videoVersions ?? (initial.renderStatus === "completed"
     ? createMockVideoVersions({
         material: defaultMaterial,
         projectName: initialProjectTitle,
@@ -590,11 +611,22 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
         language: "英语",
         subtitles: "跟随原视频",
       })
-    : [])
-  const [selectedVersionId, setSelectedVersionId] = useState(initial.renderStatus === "completed" ? "v3" : "")
+    : []))
+  const [selectedVersionId, setSelectedVersionId] = useState(referenceDraft?.selectedVersionId ?? (initial.renderStatus === "completed" ? "v3" : ""))
+  const [referenceError, setReferenceError] = useState("")
   const [pendingVersion, setPendingVersion] = useState<VideoVersion | null>(null)
+  useEffect(() => {
+    if (!referenceMaterial) return
+    const draft: ReferenceDraft = { step, maxStep, productName, brandName, productDescription, sellingPoints, scripts, model, ratio, resolution, language, subtitles, videoVersions, selectedVersionId, renderStatus }
+    const timer = window.setTimeout(() => {
+      try { localStorage.setItem(`creatisignal.curated-workspace.${projectId}`, JSON.stringify(draft)) }
+      catch { setReferenceError("创作进度保存失败，请检查浏览器存储权限") }
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [projectId, referenceMaterial, step, maxStep, productName, brandName, productDescription, sellingPoints, scripts, model, ratio, resolution, language, subtitles, videoVersions, selectedVersionId, renderStatus])
 
-  const selectedMaterial = sourceType === "upload" && uploadedSourceName
+
+  const selectedMaterial = referenceMaterial ?? (sourceType === "upload" && uploadedSourceName
     ? {
         ...defaultMaterial,
         id: "local-upload",
@@ -604,7 +636,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
         cover: "/replicate-covers/creative-draft.jpg",
         evidence: "本地上传 · 等待结构拆解",
       }
-    : WORKSPACE_MATERIALS.find((material) => material.id === selectedMaterialId) ?? defaultMaterial
+    : WORKSPACE_MATERIALS.find((material) => material.id === selectedMaterialId) ?? defaultMaterial)
   const duration = Number(selectedMaterial.duration.split(":").pop()) || 20
   const estimatedCost = getEstimatedRenderCost(duration, resolution)
   const resolvedTitle = getBetaProjectName(projectId, projectNamesSnapshot) ?? initialProjectTitle
@@ -658,6 +690,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
     : STATUS_META[status]
 
   function goToStep(next: StepId) {
+    if (referenceMaterial && next === 1) { onReturnToReference?.(); return }
     if (next <= maxStep) {
       setStep(next)
     }
@@ -675,7 +708,13 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
     setMaxStep((current) => Math.max(current, 2) as StepId)
   }
 
+
   function generateScript() {
+    if (referenceMaterial) {
+      if (!productName.trim() || !productDescription.trim() || !sellingPoints.trim()) { setReferenceError("请先填写新商品名称、商品描述和核心卖点"); return }
+      setReferenceError("")
+      setScripts(referenceScript(productName, productDescription, sellingPoints, duration))
+    }
     setBusy("script")
     window.setTimeout(() => {
       setBusy(null)
@@ -685,6 +724,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
   }
 
   function startRender() {
+    if (referenceMaterial && !selectedMaterial.video) { setReferenceError("当前素材尚未接入视频源和生成服务，已保存脚本与商品信息"); return }
     if (AVAILABLE_CREDITS < estimatedCost) return
     const nextVersionId = `v${videoVersions.length + 1}`
     setSelectedVersionId(nextVersionId)
@@ -729,9 +769,9 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
       <header className="border-b border-[var(--line)] bg-white px-5 py-3">
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href="/replicate" title="返回项目列表" aria-label="返回项目列表" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--line)] text-[#6d7179] hover:bg-[#f4f4f5]">
+            {onReturnToReference ? <button onClick={onReturnToReference} aria-label="返回素材拆解" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--line)] text-[#6d7179]"><ArrowLeft size={15} /></button> : <Link href="/replicate" title="返回项目列表" aria-label="返回项目列表" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--line)] text-[#6d7179] hover:bg-[#f4f4f5]">
               <ArrowLeft size={15} />
-            </Link>
+            </Link>}
             <div className="min-w-0">
               {editingTitle ? (
                 <div className="flex min-w-0 items-center gap-1">
@@ -807,6 +847,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
           {step === 1 && breakdownStarted && <BreakdownStep material={selectedMaterial} loading={breakdownLoading} />}
           {step === 2 && (
             <ProductStep
+              referenceProductName={referenceProductName}
               material={selectedMaterial}
               productName={productName}
               onProductName={setProductName}
@@ -828,6 +869,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
           )}
           {step === 3 && (
             <ScriptStep
+              brief={referenceMaterial ? referenceBrief(productName, productDescription, sellingPoints, referenceMaterial.evidence) : undefined}
               scripts={scripts}
               onScripts={setScripts}
             />
@@ -835,6 +877,7 @@ export function ReplicateBetaWorkspace({ projectId, title, sourceAssetId, source
         </div>
       </div>
 
+      {referenceError && <p role="alert" className="px-5 py-2 text-sm text-red-600">{referenceError}</p>}
       {step < 4 && renderStatus !== "rendering" && (
         <WorkspaceFooter
           step={step}
@@ -1599,6 +1642,7 @@ function BreakdownSkeleton({ material }: { material: BetaMaterial }) {
 
 function ProductStep({
   material,
+  referenceProductName,
   productName,
   onProductName,
   brandName,
@@ -1617,6 +1661,7 @@ function ProductStep({
   onPersonReplacementMode,
 }: {
   material: BetaMaterial
+  referenceProductName?: string
   productName: string
   onProductName: (value: string) => void
   brandName: string
@@ -1634,14 +1679,16 @@ function ProductStep({
   personReplacementMode: PersonReplacementMode | null
   onPersonReplacementMode: (value: PersonReplacementMode | null) => void
 }) {
-  const selectedTargetProduct = DETECTED_PRODUCTS.find((product) => product.id === selectedTargetProductId) ?? DETECTED_PRODUCTS[0]
-  const selectedSourcePerson = DETECTED_PEOPLE.find((person) => person.id === selectedSourcePersonId) ?? DETECTED_PEOPLE[0]
-  const [productKnowledge, setProductKnowledge] = useState(INITIAL_PRODUCT_KNOWLEDGE)
-  const [knowledgeDraft, setKnowledgeDraft] = useState(INITIAL_PRODUCT_KNOWLEDGE)
+  const sourceProducts: DetectedProduct[] = referenceProductName ? [{ id: "product-1", name: referenceProductName, shortName: referenceProductName, primary: true, imagePosition: "center", visual_identity: referenceProductName, usage_mode: material.evidence, physical_constraints: "请按实际商品核对" }] : DETECTED_PRODUCTS
+  const sourcePeople: DetectedPerson[] = referenceProductName ? [{ id: "character-1", name: "参考视频人物", type: "人物", is_host: true, description: "具体人物信息待分析服务确认" }] : DETECTED_PEOPLE
+  const selectedTargetProduct = sourceProducts.find((product) => product.id === selectedTargetProductId) ?? sourceProducts[0]
+  const selectedSourcePerson = sourcePeople.find((person) => person.id === selectedSourcePersonId) ?? sourcePeople[0]
+  const [productKnowledge, setProductKnowledge] = useState(referenceProductName ? "" : INITIAL_PRODUCT_KNOWLEDGE)
+  const [knowledgeDraft, setKnowledgeDraft] = useState(referenceProductName ? "" : INITIAL_PRODUCT_KNOWLEDGE)
   const [isEditingKnowledge, setIsEditingKnowledge] = useState(false)
   const [dhModalOpen, setDhModalOpen] = useState(false)
   const [productPickerOpen, setProductPickerOpen] = useState(false)
-  const [productImages, setProductImages] = useState(() => [
+  const [productImages, setProductImages] = useState<{ id: string; src: string; name: string }[]>(() => referenceProductName ? [] : [
     { id: "source-product-image", src: material.cover, name: "商品图 1" },
   ])
   const [activeProductImageId, setActiveProductImageId] = useState("source-product-image")
@@ -1755,7 +1802,7 @@ function ProductStep({
               </span>
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:min-h-[168px] xl:auto-rows-fr">
-              {DETECTED_PRODUCTS.map((product) => {
+              {sourceProducts.map((product) => {
                 const selected = product.id === selectedTargetProductId
                 return (
                   <button
@@ -1993,7 +2040,7 @@ function ProductStep({
             </span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 xl:min-h-[168px] xl:auto-rows-fr">
-            {DETECTED_PEOPLE.map((person) => {
+            {sourcePeople.map((person) => {
               const selected = selectedSourcePersonId === person.id
               return (
                 <button
@@ -2148,8 +2195,10 @@ function ProductStep({
 
 function ScriptStep({
   scripts,
+  brief = SCRIPT_BRIEF,
   onScripts,
 }: {
+  brief?: typeof SCRIPT_BRIEF
   scripts: typeof SCRIPT_SCENES
   onScripts: (scripts: typeof SCRIPT_SCENES) => void
 }) {
@@ -2215,15 +2264,15 @@ function ScriptStep({
             </span>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <InfoField label="创意策略" value={SCRIPT_BRIEF.overallStrategy} />
-            <InfoField label="目标受众" value={SCRIPT_BRIEF.targetAudience} />
-            <InfoField label="用户痛点" value={SCRIPT_BRIEF.userProblem} />
-            <InfoField label="核心承诺" value={SCRIPT_BRIEF.corePromise} />
+            <InfoField label="创意策略" value={brief.overallStrategy} />
+            <InfoField label="目标受众" value={brief.targetAudience} />
+            <InfoField label="用户痛点" value={brief.userProblem} />
+            <InfoField label="核心承诺" value={brief.corePromise} />
             <div>
-              <InfoField label="使用场景" value={SCRIPT_BRIEF.useScenarios.join("、")} />
+              <InfoField label="使用场景" value={brief.useScenarios.join("、")} />
             </div>
             <div>
-              <EmotionJourney items={SCRIPT_BRIEF.emotionalJourney} />
+              <EmotionJourney items={brief.emotionalJourney} />
             </div>
           </div>
         </section>

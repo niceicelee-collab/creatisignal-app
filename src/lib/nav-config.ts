@@ -5,6 +5,8 @@ import {
   Bell,
   Bot,
   Box,
+  Bookmark,
+  ClipboardList,
   FileText,
   Globe2,
   Home,
@@ -43,7 +45,6 @@ export const navSections: NavSection[] = [
     defaultHref: "/assistant",
     subMenu: [
       { label: "创意助手", href: "/assistant" },
-      { label: "我的任务", href: "/reports" },
     ],
   },
   {
@@ -64,8 +65,9 @@ export const navSections: NavSection[] = [
     defaultHref: "/discover/inspiration",
     subMenu: [
       { label: "灵感发现", href: "/discover/inspiration" },
-      { label: "品牌追踪", href: "/discover/brands" },
+      { label: "带货精选", href: "/discover/curated" },
       { label: "AIGC爆款", href: "/discover/aigc-hits" },
+      { label: "品牌追踪", href: "/discover/brands" },
     ],
   },
   {
@@ -103,6 +105,7 @@ export const navSections: NavSection[] = [
     label: "资产库",
     defaultHref: "/assets/reports",
     subMenu: [
+      { label: "我的收藏", href: "/assets/favorites", icon: Bookmark },
       { label: "创意报告", href: "/assets/reports", icon: FileText },
       { label: "创意分析", href: "/assets/analysis", icon: BarChart3 },
       { label: "创意脚本", href: "/assets/briefs", icon: FileText },
@@ -111,6 +114,13 @@ export const navSections: NavSection[] = [
       { label: "数字人", href: "/assets/avatars", icon: Users },
       { label: "上传资产", href: "/assets/uploaded", icon: Upload },
     ],
+  },
+  {
+    id: "tasks",
+    icon: ClipboardList,
+    label: "任务",
+    defaultHref: "/reports",
+    subMenu: [{ label: "我的任务", href: "/reports" }],
   },
   {
     id: "settings",

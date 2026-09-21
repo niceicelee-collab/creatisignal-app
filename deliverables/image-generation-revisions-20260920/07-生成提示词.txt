@@ -1,0 +1,5 @@
+Method: built-in imagegen image edit.
+Source: C:/Users/ice.li/AppData/Local/Temp/codex-clipboard-6677ed70-f236-43b0-886c-0cf1e3856940.png
+Output: 07-创意生成-统一引导文案-1-9.png
+
+Precise local text replacement in the attached Chinese UI prototype screenshot. Replace the THREE light-gray instructional lines below the unchanged bold '创意Tips' heading with ONLY this EXACT single line of Chinese placeholder text: '描述你想生成或修改的内容，可输入@ 引用你上传的参考图'. Preserve the space after the @ symbol exactly, and do not add punctuation. Place the new line at the same left position and baseline as the original first light-gray instruction line, with matching font, font size and light-gray color. Remove the old second and third lines entirely, leaving blank input space beneath the new line. Keep every other detail of this screenshot unchanged, including the 商品图1 reference thumbnail, heading, all tabs, open model dropdown and its model names, GPT Image 2.5 selection, 2K, 3张, counter 1/9, 24积分 button, recent-task cards and photographs, all positions, colors, full canvas and aspect ratio. Output the complete edited screenshot with only this placeholder text change.

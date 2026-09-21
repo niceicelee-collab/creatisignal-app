@@ -1,0 +1,43 @@
+[
+  {
+    "name": "爆款视频拆解结果",
+    "retained_fields": [
+      "整体策略",
+      "目标受众",
+      "创意策略",
+      "创意描述"
+    ],
+    "retained_values_match": true,
+    "geometry": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "height": 1020,
+      "missingImages": 0
+    },
+    "narrow": {
+      "width": 1366,
+      "scrollWidth": 1366
+    }
+  },
+  {
+    "name": "脚本结果",
+    "retained_fields": [
+      "创意策略",
+      "核心承诺",
+      "关键信息",
+      "口播内容",
+      "画面内容"
+    ],
+    "retained_values_match": true,
+    "geometry": {
+      "width": 1600,
+      "scrollWidth": 1600,
+      "height": 1057,
+      "missingImages": 0
+    },
+    "narrow": {
+      "width": 1366,
+      "scrollWidth": 1366
+    }
+  }
+]

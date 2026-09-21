@@ -1,0 +1,44 @@
+{
+  "version": "V5",
+  "pages": [
+    {
+      "page": "01_拆解分析结果",
+      "textUnchanged": true,
+      "removedLines": [
+        "0px"
+      ],
+      "groupDividers": [],
+      "width": 1800,
+      "viewport": 1800,
+      "brokenImages": 0
+    },
+    {
+      "page": "02_复刻第二步_爆款拆解结果",
+      "textUnchanged": true,
+      "removedLines": [
+        "0px",
+        "0px"
+      ],
+      "groupDividers": [
+        "1px"
+      ],
+      "width": 1800,
+      "viewport": 1800,
+      "brokenImages": 0
+    },
+    {
+      "page": "03_复刻第四步_脚本结果",
+      "textUnchanged": true,
+      "removedLines": [
+        "0px",
+        "0px"
+      ],
+      "groupDividers": [
+        "1px"
+      ],
+      "width": 1800,
+      "viewport": 1800,
+      "brokenImages": 0
+    }
+  ]
+}

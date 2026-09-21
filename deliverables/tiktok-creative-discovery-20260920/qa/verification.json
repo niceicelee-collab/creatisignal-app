@@ -1,0 +1,215 @@
+{
+  "screenshots": [
+    {
+      "name": "01-灵感发现.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "02-素材详情.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "03-作者信息.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "04-我的收藏.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "05-更多筛选.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "06-复刻衔接.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "07-无结果.png",
+      "width": 1600,
+      "height": 1040
+    },
+    {
+      "name": "08-素材精选管理.png",
+      "width": 1600,
+      "height": 1040
+    }
+  ],
+  "checks": [
+    {
+      "name": "01-灵感发现.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "01-灵感发现.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "02-素材详情.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "02-素材详情.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "detail no fake video element",
+      "passed": true
+    },
+    {
+      "name": "detail video metrics include shares",
+      "passed": true
+    },
+    {
+      "name": "03-作者信息.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "03-作者信息.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "author contains GMV currency and AI label",
+      "passed": true
+    },
+    {
+      "name": "author back returns to detail",
+      "passed": true
+    },
+    {
+      "name": "04-我的收藏.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "04-我的收藏.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "favorites unavailable card retained",
+      "passed": true
+    },
+    {
+      "name": "05-更多筛选.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "05-更多筛选.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "06-复刻衔接.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "06-复刻衔接.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "07-无结果.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "07-无结果.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "08-素材精选管理.png no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "08-素材精选管理.png images loaded",
+      "passed": true
+    },
+    {
+      "name": "published discovery excludes invalid",
+      "passed": true
+    },
+    {
+      "name": "category filter",
+      "passed": true
+    },
+    {
+      "name": "search by author",
+      "passed": true
+    },
+    {
+      "name": "cancel filter does not apply",
+      "passed": true
+    },
+    {
+      "name": "follower filter only below 10000",
+      "passed": true
+    },
+    {
+      "name": "filters combined by intersection",
+      "passed": true
+    },
+    {
+      "name": "play descending",
+      "passed": true
+    },
+    {
+      "name": "favorite cross page sync",
+      "passed": true
+    },
+    {
+      "name": "favorite persists after refresh",
+      "passed": true
+    },
+    {
+      "name": "unfavorite removes only one record",
+      "passed": true
+    },
+    {
+      "name": "undo favorite works",
+      "passed": true
+    },
+    {
+      "name": "detail favorite state updates",
+      "passed": true
+    },
+    {
+      "name": "Escape closes modal",
+      "passed": true
+    },
+    {
+      "name": "creation requires own product",
+      "passed": true
+    },
+    {
+      "name": "creation handoff is explicitly simulated",
+      "passed": true
+    },
+    {
+      "name": "cannot approve unchecked content",
+      "passed": true
+    },
+    {
+      "name": "approval does not publish",
+      "passed": true
+    },
+    {
+      "name": "separate publish transition",
+      "passed": true
+    },
+    {
+      "name": "1280 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}
